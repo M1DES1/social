@@ -1,0 +1,16 @@
+{
+  "name": "minecraft-panel-api",
+  "version": "1.0.0",
+  "description": "API do zarządzania serwerem Minecraft w Codespace",
+  "main": "panel-api.js",
+  "scripts": {
+    "start": "node panel-api.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "node-fetch": "^2.6.9"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
