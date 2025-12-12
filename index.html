@@ -2,644 +2,1121 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 Minecraft Server Control Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Minecraft Panel</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* === RESET I PODSTAWY === */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
-
+        
+        :root {
+            --primary: #4a9eff;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --dark: #1a1a2e;
+            --darker: #0f0f1f;
+            --light: #e0e0ff;
+            --gray: #a0a0ff;
+            --card-bg: rgba(30, 30, 50, 0.95);
+            --border: rgba(100, 100, 255, 0.2);
+        }
+        
         body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--dark);
+            color: var(--light);
+            line-height: 1.6;
+            overflow-x: hidden;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) 
+                     env(safe-area-inset-bottom) env(safe-area-inset-left);
             min-height: 100vh;
-            padding: 20px;
         }
-
-        .container {
-            max-width: 1200px;
+        
+        /* === KONTENER GŁÓWNY === */
+        .app-container {
+            max-width: 100%;
             margin: 0 auto;
-            background-color: rgba(30, 30, 46, 0.9);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            padding: 15px;
         }
-
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #3498db;
-        }
-
-        header h1 {
-            color: #3498db;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-
-        header .subtitle {
-            color: #95a5a6;
-            font-size: 1.1rem;
-        }
-
-        .control-panel {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        @media (max-width: 768px) {
-            .control-panel {
-                grid-template-columns: 1fr;
+        
+        @media (min-width: 768px) {
+            .app-container {
+                max-width: 1200px;
+                padding: 20px;
             }
         }
-
-        .status-box, .buttons {
-            background-color: rgba(40, 40, 60, 0.8);
-            padding: 25px;
-            border-radius: 10px;
-            border: 1px solid #444;
-        }
-
-        .status-box h2, .buttons h2 {
-            color: #3498db;
+        
+        /* === NAGŁÓWEK === */
+        .app-header {
+            text-align: center;
+            padding: 20px 0;
             margin-bottom: 20px;
-            font-size: 1.5rem;
+            border-bottom: 2px solid var(--primary);
+            position: relative;
         }
-
-        #serverStatus {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            font-size: 1.2rem;
-            font-weight: bold;
+        
+        .app-title {
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            color: var(--primary);
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(74, 158, 255, 0.5);
         }
-
-        .status.działa {
-            background-color: rgba(46, 204, 113, 0.2);
-            border: 2px solid #2ecc71;
-            color: #2ecc71;
+        
+        .app-subtitle {
+            color: var(--gray);
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
         }
-
-        .status.zatrzymany {
-            background-color: rgba(231, 76, 60, 0.2);
-            border: 2px solid #e74c3c;
-            color: #e74c3c;
+        
+        /* === EULA WARNING BOX === */
+        .eula-warning-box {
+            background: rgba(231, 76, 60, 0.1);
+            border: 2px solid var(--danger);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+            animation: pulse 2s infinite;
         }
-
-        .status.uruchamianie {
-            background-color: rgba(243, 156, 18, 0.2);
-            border: 2px solid #f39c12;
-            color: #f39c12;
-        }
-
-        .status.unknown {
-            background-color: rgba(149, 165, 166, 0.2);
-            border: 2px solid #95a5a6;
-            color: #95a5a6;
-        }
-
-        .status-icon {
-            margin-right: 10px;
-            font-size: 1.5rem;
-        }
-
-        .server-info {
-            color: #95a5a6;
-            font-size: 0.9rem;
-        }
-
-        .server-info strong {
-            color: #3498db;
-        }
-
-        .button-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .btn {
-            padding: 15px 25px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
+        
+        .eula-warning-box h3 {
+            color: var(--danger);
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
-            flex-grow: 1;
-            min-width: 160px;
+            gap: 10px;
         }
-
-        .btn:hover {
-            transform: translateY(-3px);
+        
+        .eula-warning-box p {
+            margin-bottom: 15px;
+            color: #ffcccb;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        /* === STATUS BAR === */
+        .status-bar {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            flex-wrap: wrap;
         }
-
-        .btn:active {
-            transform: translateY(0);
+        
+        .status-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #666;
+            flex-shrink: 0;
         }
-
-        .btn:disabled {
+        
+        .status-indicator.running { background: var(--success); animation: pulse 2s infinite; }
+        .status-indicator.stopped { background: var(--danger); }
+        .status-indicator.starting { background: var(--warning); animation: pulse 1s infinite; }
+        
+        .status-info {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .status-title {
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .players-badge {
+            background: rgba(243, 156, 18, 0.2);
+            padding: 8px 15px;
+            border-radius: 10px;
+            border: 1px solid var(--warning);
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .players-count {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--warning);
+            display: block;
+        }
+        
+        /* === PRZYCISKI AKCJI === */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .action-btn {
+            padding: 18px 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-align: center;
+            min-height: 90px;
+        }
+        
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .action-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none !important;
-            box-shadow: none !important;
         }
-
-        .btn i {
-            margin-right: 8px;
+        
+        .action-btn.start { background: linear-gradient(135deg, var(--success), #27ae60); color: white; }
+        .action-btn.stop { background: linear-gradient(135deg, var(--danger), #c0392b); color: white; }
+        .action-btn.restart { background: linear-gradient(135deg, var(--warning), #d35400); color: white; }
+        .action-btn.settings { background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; }
+        
+        .action-btn i {
+            font-size: 1.5rem;
         }
-
-        .btn-success {
-            background-color: #2ecc71;
-            color: white;
+        
+        /* === PANEL ZAKŁADEK === */
+        .tabs-container {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            border: 1px solid var(--border);
         }
-
-        .btn-danger {
-            background-color: #e74c3c;
-            color: white;
+        
+        .tabs-header {
+            display: flex;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            background: rgba(40, 40, 70, 0.9);
+            border-bottom: 2px solid var(--primary);
+            scrollbar-width: none;
         }
-
-        .btn-warning {
-            background-color: #f39c12;
-            color: white;
+        
+        .tabs-header::-webkit-scrollbar {
+            display: none;
         }
-
-        .btn-primary {
-            background-color: #3498db;
-            color: white;
+        
+        .tab-btn {
+            padding: 18px 20px;
+            border: none;
+            background: transparent;
+            color: var(--gray);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
         }
-
-        .btn-small {
-            padding: 8px 15px;
-            font-size: 0.9rem;
-            min-width: auto;
+        
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: rgba(74, 158, 255, 0.1);
         }
-
-        .hint {
-            color: #7f8c8d;
-            font-style: italic;
-            font-size: 0.9rem;
+        
+        .tab-content {
+            padding: 0;
         }
-
-        .console-container {
-            background-color: rgba(20, 20, 30, 0.95);
+        
+        .tab-pane {
+            display: none;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .tab-pane.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* === KONSOLA === */
+        .console-wrapper {
+            background: #000;
             border-radius: 10px;
             overflow: hidden;
-            margin-bottom: 30px;
-            border: 1px solid #444;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border);
         }
-
+        
         .console-header {
-            background-color: #2c3e50;
-            padding: 15px 25px;
+            background: #2c3e50;
+            padding: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
+            gap: 10px;
         }
-
-        .console-header h2 {
-            color: #3498db;
-        }
-
-        .console-controls {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .auto-refresh {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
+        
         .console-output {
-            padding: 20px;
-            max-height: 400px;
-            overflow-y: auto;
-            background-color: #1a1a2e;
-        }
-
-        #consoleLog {
-            color: #00ff9d;
+            flex: 1;
+            padding: 15px;
             font-family: 'Courier New', monospace;
-            font-size: 1rem;
-            line-height: 1.5;
+            font-size: 13px;
+            line-height: 1.4;
+            background: #000;
+            color: #00ff9d;
+            overflow-y: auto;
             white-space: pre-wrap;
             word-wrap: break-word;
-            min-height: 200px;
+            -webkit-overflow-scrolling: touch;
         }
-
-        .console-input {
+        
+        .console-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            background: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .command-input {
             display: flex;
             padding: 15px;
-            background-color: #2c3e50;
-            border-top: 1px solid #444;
+            background: #2c3e50;
+            border-top: 1px solid var(--border);
+            gap: 10px;
         }
-
+        
         #commandInput {
-            flex-grow: 1;
-            padding: 12px 15px;
-            border: none;
-            border-radius: 6px;
-            background-color: #34495e;
+            flex: 1;
+            padding: 12px;
+            background: #34495e;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            font-family: 'Courier New', monospace;
+        }
+        
+        #commandInput:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        /* === MANAGER WERSJI === */
+        .version-manager {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        @media (min-width: 768px) {
+            .version-manager {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+        }
+        
+        .card h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .engine-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .engine-btn {
+            padding: 15px 10px;
+            border: 2px solid var(--border);
+            background: rgba(30, 30, 60, 0.8);
+            color: var(--gray);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .engine-btn.active {
+            border-color: var(--primary);
+            background: rgba(74, 158, 255, 0.2);
+            color: var(--primary);
+        }
+        
+        .version-select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(30, 30, 60, 0.8);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(30, 30, 60, 0.8);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+            border: 1px solid var(--border);
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), #27ae60);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        /* === MANAGER PLIKÓW === */
+        .file-manager {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        @media (min-width: 992px) {
+            .file-manager {
+                grid-template-columns: 300px 1fr;
+            }
+        }
+        
+        .file-toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .file-list {
+            height: 300px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 10px;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .file-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: rgba(30, 30, 60, 0.8);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-item:active {
+            background: rgba(74, 158, 255, 0.2);
+            transform: translateX(5px);
+        }
+        
+        .file-editor {
+            display: flex;
+            flex-direction: column;
+            height: 300px;
+        }
+        
+        .file-content {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            color: var(--light);
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: none;
+            white-space: pre;
+            overflow-x: auto;
+        }
+        
+        /* === USTAWIENIA SERWERA === */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .setting-group {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+        }
+        
+        .setting-item {
+            margin-bottom: 15px;
+        }
+        
+        .setting-label {
+            display: block;
+            color: var(--gray);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .setting-input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(30, 30, 60, 0.8);
+            border: 2px solid var(--border);
+            border-radius: 8px;
             color: white;
             font-size: 1rem;
         }
-
-        #commandInput:focus {
-            outline: none;
-            box-shadow: 0 0 0 2px #3498db;
+        
+        .slider-container {
+            padding: 10px 0;
         }
-
-        #sendCommandBtn {
-            margin-left: 10px;
-            background-color: #3498db;
-            color: white;
-        }
-
-        .connection-info {
-            background-color: rgba(40, 40, 60, 0.8);
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        .connection-info h3 {
-            color: #3498db;
-            margin-bottom: 15px;
-        }
-
-        .connection-info p {
-            margin-bottom: 10px;
-        }
-
-        .connection-info code {
-            background-color: #2c3e50;
-            padding: 3px 8px;
+        
+        .slider {
+            width: 100%;
+            height: 8px;
+            -webkit-appearance: none;
+            background: rgba(30, 30, 60, 0.8);
             border-radius: 4px;
-            color: #2ecc71;
+            outline: none;
         }
-
-        footer {
-            text-align: center;
-            padding-top: 20px;
-            border-top: 1px solid #444;
-            color: #95a5a6;
-            font-size: 0.9rem;
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            border: 2px solid white;
         }
-
-        footer a {
-            color: #3498db;
-            text-decoration: none;
+        
+        /* === NOTYFIKACJE === */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            max-width: 90%;
+            word-break: break-word;
         }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
-
-        /* Modal EULA */
-        .eula-modal {
+        
+        .notification.success { background: var(--success); }
+        .notification.error { background: var(--danger); }
+        .notification.warning { background: var(--warning); }
+        
+        /* === MODAL EULA === */
+        .modal-overlay {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 2000;
             justify-content: center;
             align-items: center;
             padding: 20px;
         }
-
-        .eula-modal.active {
+        
+        .modal-overlay.active {
             display: flex;
         }
-
-        .eula-content {
-            background-color: #1a1a2e;
-            border-radius: 15px;
-            max-width: 800px;
+        
+        .modal {
+            background: var(--card-bg);
+            border-radius: 20px;
+            max-width: 600px;
             width: 100%;
-            max-height: 90vh;
+            border: 3px solid var(--danger);
             overflow: hidden;
-            border: 3px solid #e74c3c;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
         }
-
-        .eula-header {
-            background-color: #e74c3c;
-            padding: 20px;
+        
+        .modal-header {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            padding: 25px;
             text-align: center;
             color: white;
         }
-
-        .eula-header h2 {
+        
+        .modal-header h2 {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 15px;
+            font-size: 1.8rem;
         }
-
-        .eula-body {
+        
+        .modal-body {
             padding: 30px;
-            overflow-y: auto;
             max-height: 60vh;
+            overflow-y: auto;
         }
-
-        .eula-text {
-            background-color: rgba(0, 0, 0, 0.3);
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            line-height: 1.6;
-        }
-
-        .eula-text h3 {
-            color: #f39c12;
-            margin-bottom: 10px;
-        }
-
-        .eula-text ol {
-            margin-left: 20px;
-            margin-bottom: 15px;
-        }
-
-        .eula-text li {
-            margin-bottom: 8px;
-        }
-
-        .eula-text strong {
-            color: #3498db;
-        }
-
-        .eula-warning {
-            background-color: rgba(243, 156, 18, 0.1);
-            border-left: 4px solid #f39c12;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 0 8px 8px 0;
-        }
-
-        .eula-footer {
+        
+        .modal-footer {
             padding: 20px 30px;
-            background-color: rgba(40, 40, 60, 0.8);
+            background: rgba(40, 40, 70, 0.9);
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 15px;
         }
-
-        .eula-buttons {
-            display: flex;
-            gap: 15px;
-        }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            border-radius: 8px;
-            color: white;
-            font-weight: bold;
-            z-index: 1001;
-            animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            max-width: 400px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .notification.success {
-            background-color: #2ecc71;
-        }
-
-        .notification.error {
-            background-color: #e74c3c;
-        }
-
-        .notification.warning {
-            background-color: #f39c12;
-        }
-
-        .notification.info {
-            background-color: #3498db;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes fadeOut {
-            from {
-                opacity: 1;
-            }
-            to {
-                opacity: 0;
-            }
-        }
-
-        /* EULA Warning Box */
-        .eula-warning-box {
-            background-color: rgba(231, 76, 60, 0.1);
-            border: 2px solid #e74c3c;
-            border-radius: 10px;
+        
+        .modal-content {
+            background: rgba(0, 0, 0, 0.2);
             padding: 20px;
-            margin-bottom: 25px;
-            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            line-height: 1.6;
         }
-
-        .eula-warning-box h3 {
-            color: #e74c3c;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .eula-warning-box p {
+        
+        .modal-content h3 {
+            color: #f39c12;
             margin-bottom: 15px;
-            color: #ffcccb;
         }
-
-        /* Loading spinner */
+        
+        .modal-content ol {
+            margin-left: 25px;
+            margin-bottom: 15px;
+        }
+        
+        .modal-content li {
+            margin-bottom: 10px;
+        }
+        
+        .modal-warning {
+            background: rgba(243, 156, 18, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        /* === RESPONSYWNOŚĆ === */
+        @media (max-width: 480px) {
+            .action-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-bar {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .players-badge {
+                width: 100%;
+            }
+            
+            .tabs-header {
+                justify-content: space-around;
+            }
+            
+            .tab-btn {
+                padding: 15px;
+                font-size: 0.9rem;
+            }
+            
+            .file-manager {
+                height: auto;
+            }
+        }
+        
+        /* === LOADING STATES === */
         .loading {
             text-align: center;
             padding: 40px;
-            color: #95a5a6;
+            color: var(--gray);
         }
-
+        
         .spinner {
             display: inline-block;
             width: 40px;
             height: 40px;
-            border: 4px solid rgba(52, 152, 219, 0.3);
+            border: 4px solid rgba(74, 158, 255, 0.3);
             border-radius: 50%;
-            border-top-color: #3498db;
-            animation: spin 1s linear infinite;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
             margin-bottom: 15px;
         }
-
+        
         @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+            to { transform: rotate(360deg); }
         }
-
-        /* Log colors */
-        .log-error {
-            color: #ff6b6b;
+        
+        /* === FOOTER === */
+        .app-footer {
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 30px;
+            border-top: 1px solid var(--border);
+            color: var(--gray);
+            font-size: 0.9rem;
         }
-
-        .log-success {
-            color: #2ecc71;
+        
+        .connection-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
         }
-
-        .log-info {
-            color: #3498db;
-        }
-
-        .log-warning {
-            color: #f39c12;
-        }
-
-        .log-system {
-            color: #9b59b6;
+        
+        .status-connected { background: rgba(46, 204, 113, 0.2); color: var(--success); }
+        .status-disconnected { background: rgba(231, 76, 60, 0.2); color: var(--danger); }
+        
+        /* === LOG COLORS === */
+        .log-error { color: #ff6b6b; }
+        .log-success { color: #2ecc71; }
+        .log-info { color: #3498db; }
+        .log-warning { color: #f39c12; }
+        .log-system { color: #9b59b6; }
+        
+        /* === TOUCH-FRIENDLY === */
+        button, .clickable {
+            min-height: 44px;
+            min-width: 44px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1><i class="fas fa-gamepad"></i> Minecraft Server Control Panel</h1>
-            <p class="subtitle">Zarządzaj serwerem Minecraft z poziomu przeglądarki</p>
+    <div class="app-container">
+        <!-- Nagłówek -->
+        <header class="app-header">
+            <h1 class="app-title">🎮 Minecraft Control</h1>
+            <p class="app-subtitle">Zarządzaj serwerem z każdego urządzenia</p>
         </header>
-
-        <!-- EULA Warning Box - pokazuje się tylko gdy EULA nie jest zaakceptowana -->
+        
+        <!-- EULA Warning Box -->
         <div class="eula-warning-box" id="eulaWarningBox" style="display: none;">
             <h3><i class="fas fa-exclamation-triangle"></i> WYMAGANA AKCEPTACJA EULA</h3>
-            <p>Aby uruchomić serwer Minecraft, musisz zaakceptować Minecraft EULA (End User License Agreement).</p>
-            <button class="btn btn-primary" id="showEulaBtn">
+            <p>Aby uruchomić serwer Minecraft, musisz zaakceptować Minecraft EULA.</p>
+            <button class="btn-small" id="showEulaModalBtn" style="background: var(--danger);">
                 <i class="fas fa-file-contract"></i> Zaakceptuj EULA
             </button>
         </div>
-
-        <div class="control-panel">
-            <div class="status-box">
-                <h2><i class="fas fa-server"></i> Status Serwera</h2>
-                <div id="serverStatus" class="status zatrzymany">
-                    <span class="status-icon">⭕</span>
-                    <span id="statusText">Ładowanie...</span>
-                </div>
-                <div class="server-info">
-                    <p><strong>Silnik:</strong> <span id="engineInfo">Paper</span></p>
-                    <p><strong>Wersja:</strong> <span id="versionInfo">1.20.4</span></p>
-                    <p><strong>Graczy online:</strong> <span id="playerCount">0</span></p>
-                    <p><strong>EULA Status:</strong> <span id="eulaStatus">Sprawdzanie...</span></p>
-                    <p><strong>Ostatnia aktualizacja:</strong> <span id="lastUpdate">-</span></p>
-                </div>
+        
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-indicator" id="statusIndicator"></div>
+            <div class="status-info">
+                <div class="status-title" id="statusTitle">Łączenie...</div>
+                <div class="status-desc" id="statusDetails">Inicjalizacja połączenia</div>
+                <small>Silnik: <span id="currentEngine">paper</span> | Wersja: <span id="currentVersion">1.20.4</span> | EULA: <span id="eulaStatusText">❌ Wymaga akceptacji</span></small>
             </div>
-
-            <div class="buttons">
-                <h2><i class="fas fa-cogs"></i> Kontrola</h2>
-                <div class="button-group">
-                    <button class="btn btn-success" id="startBtn">
-                        <i class="fas fa-play"></i> Start Serwera
-                    </button>
-                    <button class="btn btn-danger" id="stopBtn" disabled>
-                        <i class="fas fa-stop"></i> Stop Serwera
-                    </button>
-                    <button class="btn btn-warning" id="restartBtn" disabled>
-                        <i class="fas fa-redo"></i> Restart Serwera
-                    </button>
-                </div>
-                <div class="button-group">
-                    <button class="btn btn-primary" id="eulaStatusBtn">
-                        <i class="fas fa-file-contract"></i> EULA Status
-                    </button>
-                    <button class="btn btn-primary" id="refreshStatusBtn">
-                        <i class="fas fa-sync-alt"></i> Odśwież Status
-                    </button>
-                </div>
-                <p class="hint">Upewnij się, że zaakceptowałeś EULA przed uruchomieniem serwera.</p>
+            <div class="players-badge">
+                <span class="players-count" id="playerCount">0</span>
+                <div>Graczy</div>
             </div>
         </div>
-
-        <div class="console-container">
-            <div class="console-header">
-                <h2><i class="fas fa-terminal"></i> Konsola Serwera</h2>
-                <div class="console-controls">
-                    <div class="auto-refresh">
-                        <input type="checkbox" id="autoRefresh" checked>
-                        <label for="autoRefresh">Auto-odświeżanie</label>
-                    </div>
-                    <button class="btn btn-small btn-primary" id="clearConsoleBtn">
-                        <i class="fas fa-broom"></i> Wyczyść
-                    </button>
-                </div>
-            </div>
-            <div class="console-output">
-                <div id="consoleLog" class="loading">
-                    <div class="spinner"></div>
-                    <p>Ładowanie konsoli...</p>
-                </div>
-            </div>
-            <div class="console-input">
-                <input type="text" id="commandInput" placeholder="Wpisz komendę Minecraft (np. /help, /say)...">
-                <button class="btn btn-primary" id="sendCommandBtn">
-                    <i class="fas fa-paper-plane"></i> Wyślij
+        
+        <!-- Szybkie przyciski akcji -->
+        <div class="action-grid">
+            <button class="action-btn start" id="startBtn" disabled>
+                <i class="fas fa-play"></i>
+                <span>START</span>
+            </button>
+            <button class="action-btn stop" id="stopBtn">
+                <i class="fas fa-stop"></i>
+                <span>STOP</span>
+            </button>
+            <button class="action-btn restart" id="restartBtn">
+                <i class="fas fa-redo"></i>
+                <span>RESTART</span>
+            </button>
+            <button class="action-btn settings" id="eulaBtn">
+                <i class="fas fa-file-contract"></i>
+                <span>EULA</span>
+            </button>
+        </div>
+        
+        <!-- Panel zakładek -->
+        <div class="tabs-container">
+            <div class="tabs-header">
+                <button class="tab-btn active" data-tab="console">
+                    <i class="fas fa-terminal"></i> Konsola
+                </button>
+                <button class="tab-btn" data-tab="version">
+                    <i class="fas fa-download"></i> Wersje
+                </button>
+                <button class="tab-btn" data-tab="files">
+                    <i class="fas fa-folder"></i> Pliki
+                </button>
+                <button class="tab-btn" data-tab="settings">
+                    <i class="fas fa-sliders-h"></i> Ustawienia
+                </button>
+                <button class="tab-btn" data-tab="plugins">
+                    <i class="fas fa-puzzle-piece"></i> Pluginy
                 </button>
             </div>
+            
+            <div class="tab-content">
+                <!-- Zakładka Konsola -->
+                <div class="tab-pane active" id="console-tab">
+                    <div class="console-wrapper">
+                        <div class="console-header">
+                            <h3 style="color: var(--primary); margin: 0;">
+                                <i class="fas fa-terminal"></i> Konsola serwera
+                            </h3>
+                            <div class="console-controls">
+                                <button class="btn-small" id="clearBtn">
+                                    <i class="fas fa-broom"></i>
+                                </button>
+                                <button class="btn-small" id="refreshConsoleBtn">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="console-output" id="consoleOutput">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                                <p>Ładowanie konsoli...</p>
+                            </div>
+                        </div>
+                        
+                        <div class="command-input">
+                            <input type="text" id="commandInput" 
+                                   placeholder="Wpisz komendę Minecraft...">
+                            <button class="btn-small" id="sendBtn" style="background: var(--primary);">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Zakładka Wersje -->
+                <div class="tab-pane" id="version-tab">
+                    <div class="version-manager">
+                        <div class="card">
+                            <h3><i class="fas fa-cogs"></i> Wybierz silnik</h3>
+                            <div class="engine-selector">
+                                <button class="engine-btn" data-engine="vanilla">
+                                    <i class="fas fa-cube"></i> Vanilla
+                                </button>
+                                <button class="engine-btn active" data-engine="paper">
+                                    <i class="fas fa-file-alt"></i> Paper
+                                </button>
+                                <button class="engine-btn" data-engine="forge">
+                                    <i class="fas fa-tools"></i> Forge
+                                </button>
+                            </div>
+                            <p style="color: var(--gray); font-size: 0.9rem; margin-top: 10px;">
+                                <strong>Paper</strong> jest zalecany - lepsza wydajność i wsparcie pluginów.
+                            </p>
+                        </div>
+                        
+                        <div class="card">
+                            <h3><i class="fas fa-code-branch"></i> Wybierz wersję</h3>
+                            <select class="version-select" id="versionSelect">
+                                <option value="">Ładowanie wersji...</option>
+                            </select>
+                            
+                            <div style="margin: 15px 0; padding: 10px; background: rgba(243, 156, 18, 0.1); 
+                                       border-radius: 8px; border-left: 4px solid var(--warning);">
+                                <strong>Wymagana Java:</strong> <span id="javaRequirement">Java 17+</span>
+                            </div>
+                            
+                            <button class="action-btn start" id="downloadBtn" style="width: 100%;">
+                                <i class="fas fa-download"></i> Pobierz i zainstaluj
+                            </button>
+                            
+                            <div class="progress-bar" id="downloadProgress" style="display: none; margin-top: 15px;">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <div id="progressText" style="text-align: center; color: var(--gray); font-size: 0.9rem;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Zakładka Pliki -->
+                <div class="tab-pane" id="files-tab">
+                    <div class="file-manager">
+                        <div class="card">
+                            <h3><i class="fas fa-folder-open"></i> Eksplorator plików</h3>
+                            <div class="file-toolbar">
+                                <button class="btn-small" id="backBtn">
+                                    <i class="fas fa-arrow-left"></i>
+                                </button>
+                                <button class="btn-small" id="uploadBtn">
+                                    <i class="fas fa-upload"></i> Wgraj
+                                </button>
+                                <button class="btn-small" id="deleteBtn" style="background: var(--danger);">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <button class="btn-small" id="refreshFilesBtn">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </div>
+                            <div style="padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; 
+                                      margin-bottom: 10px; font-family: monospace; font-size: 0.9rem;">
+                                Ścieżka: <span id="filePath">/</span>
+                            </div>
+                            <div class="file-list" id="fileList">
+                                <div class="loading">
+                                    <div class="spinner"></div>
+                                    <p>Ładowanie plików...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h3 style="margin: 0;"><i class="fas fa-edit"></i> Edytor</h3>
+                                <div>
+                                    <button class="btn-small" id="saveFileBtn" style="display: none;">
+                                        <i class="fas fa-save"></i> Zapisz
+                                    </button>
+                                    <button class="btn-small" id="downloadFileBtn" style="display: none; margin-left: 10px;">
+                                        <i class="fas fa-download"></i> Pobierz
+                                    </button>
+                                </div>
+                            </div>
+                            <textarea class="file-content" id="fileContent" 
+                                      placeholder="Wybierz plik z listy aby edytować..." readonly></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Zakładka Ustawienia -->
+                <div class="tab-pane" id="settings-tab">
+                    <div class="settings-grid">
+                        <div class="setting-group">
+                            <h3><i class="fas fa-users"></i> Ustawienia graczy</h3>
+                            
+                            <div class="setting-item">
+                                <label class="setting-label">Maksymalna liczba graczy</label>
+                                <div class="slider-container">
+                                    <input type="range" class="slider" id="maxPlayers" 
+                                           min="1" max="100" value="20" oninput="updateSliderValue('maxPlayers', this.value)">
+                                    <div style="text-align: center; margin-top: 5px;">
+                                        <span id="maxPlayersValue">20</span> graczy
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <label class="setting-label">Tryb gry</label>
+                                <select class="setting-input" id="gamemode">
+                                    <option value="survival">Survival</option>
+                                    <option value="creative">Creative</option>
+                                    <option value="adventure">Adventure</option>
+                                    <option value="spectator">Spectator</option>
+                                </select>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <label class="setting-label">Poziom trudności</label>
+                                <select class="setting-input" id="difficulty">
+                                    <option value="peaceful">Pokojowy</option>
+                                    <option value="easy">Łatwy</option>
+                                    <option value="normal" selected>Normalny</option>
+                                    <option value="hard">Trudny</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-group">
+                            <h3><i class="fas fa-server"></i> Ustawienia serwera</h3>
+                            
+                            <div class="setting-item">
+                                <label class="setting-label">Odległość renderowania</label>
+                                <div class="slider-container">
+                                    <input type="range" class="slider" id="viewDistance" 
+                                           min="2" max="32" value="10" oninput="updateSliderValue('viewDistance', this.value)">
+                                    <div style="text-align: center; margin-top: 5px;">
+                                        <span id="viewDistanceValue">10</span> chunków
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <label class="setting-label">MOTD (wiadomość dnia)</label>
+                                <input type="text" class="setting-input" id="motd" 
+                                       value="Mój serwer Minecraft" placeholder="Nazwa serwera">
+                            </div>
+                            
+                            <div class="setting-item">
+                                <label class="setting-label">
+                                    <input type="checkbox" id="pvp" checked> PVP włączone
+                                </label>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <label class="setting-label">
+                                    <input type="checkbox" id="commandBlocks"> Bloki komend
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-group">
+                            <h3><i class="fas fa-shield-alt"></i> Bezpieczeństwo</h3>
+                            
+                            <div class="setting-item">
+                                <label class="setting-label">
+                                    <input type="checkbox" id="onlineMode" checked> Tryb online (Mojang auth)
+                                </label>
+                                <small style="color: var(--gray); display: block; margin-top: 5px;">
+                                    Wyłącz dla serwera lokalnego
+                                </small>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <label class="setting-label">
+                                    <input type="checkbox" id="whiteList"> Whitelist
+                                </label>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <label class="setting-label">Hasło serwera (opcjonalne)</label>
+                                <input type="password" class="setting-input" id="serverPassword" 
+                                       placeholder="Pozostaw puste aby wyłączyć">
+                            </div>
+                            
+                            <button class="action-btn start" id="saveSettingsBtn" style="width: 100%; margin-top: 20px;">
+                                <i class="fas fa-save"></i> Zapisz wszystkie ustawienia
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Zakładka Pluginy -->
+                <div class="tab-pane" id="plugins-tab">
+                    <div class="card">
+                        <h3><i class="fas fa-puzzle-piece"></i> Manager pluginów</h3>
+                        
+                        <div style="border: 2px dashed var(--border); padding: 30px; border-radius: 10px; 
+                                  text-align: center; margin-bottom: 20px;">
+                            <i class="fas fa-file-archive" style="font-size: 3rem; color: var(--primary); 
+                                margin-bottom: 15px;"></i>
+                            <p style="color: var(--gray); margin-bottom: 20px;">
+                                Przeciągnij i upuść pliki .jar pluginów tutaj
+                            </p>
+                            <input type="file" id="pluginUpload" accept=".jar" multiple 
+                                   style="display: none;">
+                            <button class="action-btn start" id="browsePluginsBtn" 
+                                    style="background: #9b59b6;">
+                                <i class="fas fa-folder-open"></i> Przeglądaj pluginy
+                            </button>
+                        </div>
+                        
+                        <h4 style="color: var(--primary); margin: 20px 0 10px 0;">
+                            <i class="fas fa-list"></i> Zainstalowane pluginy
+                        </h4>
+                        <div id="pluginsList" style="max-height: 300px; overflow-y: auto;">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                                <p>Ładowanie pluginów...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div class="connection-info">
-            <h3><i class="fas fa-info-circle"></i> Informacje o połączeniu</h3>
-            <p><strong>Adres serwera API:</strong> <code id="apiUrl">https://turbo-fortnight-wr757r5wr7wrfgw75-5001.app.github.dev</code></p>
-            <p><strong>Status połączenia:</strong> <span id="connectionStatus" class="status zatrzymany">Łączenie...</span></p>
-            <p><strong>Ścieżka serwera:</strong> <code>/workspaces/codespaces-blank/minecraft_serwer</code></p>
+        
+        <!-- Informacje o połączeniu -->
+        <div style="background: var(--card-bg); padding: 15px; border-radius: 10px; 
+                   margin-top: 20px; border: 1px solid var(--border);">
+            <div style="display: flex; justify-content: space-between; align-items: center; 
+                       flex-wrap: wrap; gap: 10px;">
+                <div>
+                    <small style="color: var(--gray);">Połączenie:</small>
+                    <div style="font-family: monospace; font-size: 0.9rem; word-break: break-all;">
+                        <span id="backendUrl">https://turbo-fortnight-wr757r5wr7wrfgw75-5001.app.github.dev</span>
+                    </div>
+                </div>
+                <div>
+                    <span id="connectionStatus" class="connection-status status-disconnected">
+                        <i class="fas fa-wifi"></i> Łączenie...
+                    </span>
+                </div>
+            </div>
         </div>
-
-        <footer>
-            <p>Minecraft Server Control Panel v2.0 | Panel sterowania serwerem Minecraft</p>
-            <p>Uwaga: Serwer Minecraft musi mieć zaakceptowane EULA przed uruchomieniem.</p>
+        
+        <!-- Stopka -->
+        <footer class="app-footer">
+            <p>Minecraft Control Panel v2.0 | 
+                <span id="lastCheck" style="color: var(--primary); font-weight: 600;">-</span>
+            </p>
         </footer>
     </div>
-
+    
     <!-- Modal EULA -->
-    <div class="eula-modal" id="eulaModal">
-        <div class="eula-content">
-            <div class="eula-header">
+    <div class="modal-overlay" id="eulaModal">
+        <div class="modal">
+            <div class="modal-header">
                 <h2><i class="fas fa-file-contract"></i> Akceptacja Minecraft EULA</h2>
             </div>
-            <div class="eula-body">
-                <div class="eula-text">
+            <div class="modal-body">
+                <div class="modal-content">
                     <h3>Minecraft End User License Agreement (EULA)</h3>
                     <p>Aby uruchomić serwer Minecraft, musisz zaakceptować warunki licencyjne Mojang Studios:</p>
                     
@@ -650,560 +1127,1051 @@
                         <li>Serwer będzie używany zgodnie z przeznaczeniem</li>
                     </ol>
 
-                    <p><strong>Pełna treść EULA:</strong> <a href="https://aka.ms/MinecraftEULA" target="_blank" style="color: #3498db;">https://aka.ms/MinecraftEULA</a></p>
+                    <p><strong>Pełna treść EULA:</strong> <a href="https://aka.ms/MinecraftEULA" target="_blank" style="color: var(--primary);">https://aka.ms/MinecraftEULA</a></p>
                     
-                    <div class="eula-warning">
+                    <div class="modal-warning">
                         <p><strong><i class="fas fa-exclamation-triangle"></i> WAŻNE:</strong> Kliknięcie przycisku "Akceptuję EULA" spowoduje automatyczną zmianę pliku <code>eula.txt</code> w folderze serwera z <code>eula=false</code> na <code>eula=true</code>. Jest to wymagane przez Mojang Studios do legalnego uruchomienia serwera.</p>
                     </div>
 
                     <p>Po zaakceptowaniu EULA będziesz mógł uruchomić serwer Minecraft.</p>
                 </div>
             </div>
-            <div class="eula-footer">
+            <div class="modal-footer">
                 <div>
-                    <p><i class="fas fa-info-circle"></i> Status EULA: <span id="currentEulaStatus">Nieznany</span></p>
+                    <p><i class="fas fa-info-circle"></i> Status: <span id="modalEulaStatus">Nieznany</span></p>
                 </div>
-                <div class="eula-buttons">
-                    <button class="btn btn-primary" id="acceptEulaBtn">
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-small" id="acceptEulaBtn" style="background: var(--success);">
                         <i class="fas fa-check-circle"></i> Akceptuję EULA
                     </button>
-                    <button class="btn btn-danger" id="cancelEulaBtn">
+                    <button class="btn-small" id="closeEulaModalBtn" style="background: var(--danger);">
                         <i class="fas fa-times-circle"></i> Anuluj
                     </button>
                 </div>
             </div>
         </div>
     </div>
-
+    
+    <!-- Ukryty input do wgrywania plików -->
+    <input type="file" id="hiddenFileUpload" style="display: none;" multiple>
+    
     <script>
-        // Konfiguracja
-        const API_URL = "https://turbo-fortnight-wr757r5wr7wrfgw75-5001.app.github.dev";
-        let isConnected = false;
-        let autoRefreshEnabled = true;
-        let refreshInterval = null;
-        let eulaAccepted = false;
-
-        // Elementy DOM
-        const elements = {
-            // Status
-            serverStatus: document.getElementById('serverStatus'),
-            statusText: document.getElementById('statusText'),
-            engineInfo: document.getElementById('engineInfo'),
-            versionInfo: document.getElementById('versionInfo'),
-            playerCount: document.getElementById('playerCount'),
-            eulaStatus: document.getElementById('eulaStatus'),
-            lastUpdate: document.getElementById('lastUpdate'),
-            
-            // Przyciski
-            startBtn: document.getElementById('startBtn'),
-            stopBtn: document.getElementById('stopBtn'),
-            restartBtn: document.getElementById('restartBtn'),
-            eulaStatusBtn: document.getElementById('eulaStatusBtn'),
-            refreshStatusBtn: document.getElementById('refreshStatusBtn'),
-            showEulaBtn: document.getElementById('showEulaBtn'),
-            
-            // Konsola
-            consoleLog: document.getElementById('consoleLog'),
-            commandInput: document.getElementById('commandInput'),
-            sendCommandBtn: document.getElementById('sendCommandBtn'),
-            clearConsoleBtn: document.getElementById('clearConsoleBtn'),
-            autoRefreshCheckbox: document.getElementById('autoRefresh'),
-            
-            // Połączenie
-            apiUrl: document.getElementById('apiUrl'),
-            connectionStatus: document.getElementById('connectionStatus'),
-            
-            // EULA
-            eulaModal: document.getElementById('eulaModal'),
-            eulaWarningBox: document.getElementById('eulaWarningBox'),
-            acceptEulaBtn: document.getElementById('acceptEulaBtn'),
-            cancelEulaBtn: document.getElementById('cancelEulaBtn'),
-            currentEulaStatus: document.getElementById('currentEulaStatus')
-        };
-
-        // Inicjalizacja
-        document.addEventListener('DOMContentLoaded', function() {
-            elements.apiUrl.textContent = API_URL;
-            setupEventListeners();
-            checkConnection();
-            startAutoRefresh();
-            
-            // Ukryj loading spinner po załadowaniu
-            setTimeout(() => {
-                const loadingDiv = elements.consoleLog.querySelector('.loading');
-                if (loadingDiv) {
-                    loadingDiv.style.display = 'none';
-                }
-            }, 1000);
-        });
-
-        function setupEventListeners() {
-            // Podstawowe przyciski kontroli
-            elements.startBtn.addEventListener('click', () => sendCommand('start'));
-            elements.stopBtn.addEventListener('click', () => sendCommand('stop'));
-            elements.restartBtn.addEventListener('click', () => sendCommand('restart'));
-            elements.refreshStatusBtn.addEventListener('click', checkStatus);
-            
-            // Konsola
-            elements.sendCommandBtn.addEventListener('click', sendCustomCommand);
-            elements.clearConsoleBtn.addEventListener('click', clearConsole);
-            elements.commandInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') sendCustomCommand();
-            });
-            
-            elements.autoRefreshCheckbox.addEventListener('change', (e) => {
-                autoRefreshEnabled = e.target.checked;
-                if (autoRefreshEnabled) {
-                    startAutoRefresh();
-                } else {
-                    stopAutoRefresh();
-                }
-            });
-            
-            // EULA
-            elements.eulaStatusBtn.addEventListener('click', showEulaModal);
-            elements.showEulaBtn.addEventListener('click', showEulaModal);
-            elements.acceptEulaBtn.addEventListener('click', acceptEula);
-            elements.cancelEulaBtn.addEventListener('click', hideEulaModal);
-            
-            // Zamknij modal po kliknięciu poza nim
-            elements.eulaModal.addEventListener('click', (e) => {
-                if (e.target === elements.eulaModal) {
-                    hideEulaModal();
-                }
-            });
-            
-            // Escape zamyka modal
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && elements.eulaModal.classList.contains('active')) {
-                    hideEulaModal();
-                }
-            });
-        }
-
-        function showEulaModal() {
-            elements.eulaModal.classList.add('active');
-            elements.currentEulaStatus.textContent = eulaAccepted ? '✅ Zaakceptowana' : '❌ Wymaga akceptacji';
-            document.body.style.overflow = 'hidden';
-        }
-
-        function hideEulaModal() {
-            elements.eulaModal.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
-
-        async function checkConnection() {
-            try {
-                updateConnectionStatus('⌛ Łączenie...', '#f39c12');
+        class MinecraftController {
+            constructor() {
+                // Konfiguracja
+                this.apiUrl = "https://turbo-fortnight-wr757r5wr7wrfgw75-5001.app.github.dev";
                 
-                const response = await fetch(`${API_URL}/api/status`);
+                // Stany
+                this.autoRefresh = true;
+                this.refreshInterval = null;
+                this.isConnected = false;
+                this.eulaAccepted = false;
+                this.currentEngine = "paper";
+                this.currentVersion = "1.20.4";
+                this.currentFilePath = "/";
+                this.fileContentOriginal = "";
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
+                // Elementy DOM
+                this.elements = {
+                    // EULA
+                    eulaWarningBox: document.getElementById('eulaWarningBox'),
+                    eulaStatusText: document.getElementById('eulaStatusText'),
+                    showEulaModalBtn: document.getElementById('showEulaModalBtn'),
+                    eulaModal: document.getElementById('eulaModal'),
+                    modalEulaStatus: document.getElementById('modalEulaStatus'),
+                    acceptEulaBtn: document.getElementById('acceptEulaBtn'),
+                    closeEulaModalBtn: document.getElementById('closeEulaModalBtn'),
+                    eulaBtn: document.getElementById('eulaBtn'),
+                    
+                    // Status
+                    statusIndicator: document.getElementById('statusIndicator'),
+                    statusTitle: document.getElementById('statusTitle'),
+                    statusDetails: document.getElementById('statusDetails'),
+                    playerCount: document.getElementById('playerCount'),
+                    currentEngine: document.getElementById('currentEngine'),
+                    currentVersion: document.getElementById('currentVersion'),
+                    lastCheck: document.getElementById('lastCheck'),
+                    
+                    // Control buttons
+                    startBtn: document.getElementById('startBtn'),
+                    stopBtn: document.getElementById('stopBtn'),
+                    restartBtn: document.getElementById('restartBtn'),
+                    
+                    // Console
+                    consoleOutput: document.getElementById('consoleOutput'),
+                    commandInput: document.getElementById('commandInput'),
+                    sendBtn: document.getElementById('sendBtn'),
+                    clearBtn: document.getElementById('clearBtn'),
+                    refreshConsoleBtn: document.getElementById('refreshConsoleBtn'),
+                    
+                    // Version Manager
+                    engineButtons: document.querySelectorAll('.engine-btn'),
+                    versionSelect: document.getElementById('versionSelect'),
+                    downloadBtn: document.getElementById('downloadBtn'),
+                    javaRequirement: document.getElementById('javaRequirement'),
+                    downloadProgress: document.getElementById('downloadProgress'),
+                    progressFill: document.getElementById('progressFill'),
+                    progressText: document.getElementById('progressText'),
+                    
+                    // File Manager
+                    backBtn: document.getElementById('backBtn'),
+                    uploadBtn: document.getElementById('uploadBtn'),
+                    deleteBtn: document.getElementById('deleteBtn'),
+                    refreshFilesBtn: document.getElementById('refreshFilesBtn'),
+                    filePath: document.getElementById('filePath'),
+                    fileList: document.getElementById('fileList'),
+                    fileContent: document.getElementById('fileContent'),
+                    saveFileBtn: document.getElementById('saveFileBtn'),
+                    downloadFileBtn: document.getElementById('downloadFileBtn'),
+                    hiddenFileUpload: document.getElementById('hiddenFileUpload'),
+                    
+                    // Settings
+                    saveSettingsBtn: document.getElementById('saveSettingsBtn'),
+                    
+                    // Plugins
+                    browsePluginsBtn: document.getElementById('browsePluginsBtn'),
+                    pluginUpload: document.getElementById('pluginUpload'),
+                    pluginsList: document.getElementById('pluginsList'),
+                    
+                    // Connection
+                    connectionStatus: document.getElementById('connectionStatus'),
+                    backendUrl: document.getElementById('backendUrl'),
+                    
+                    // Tabs
+                    tabButtons: document.querySelectorAll('.tab-btn')
+                };
                 
-                const data = await response.json();
-                isConnected = true;
-                updateConnectionStatus('✅ Połączono', '#2ecc71');
-                updateStatus(data);
-                
-                // Aktualizuj status EULA
-                eulaAccepted = data.eula_accepted || false;
-                updateEulaStatus(eulaAccepted);
-                
-                elements.lastUpdate.textContent = new Date().toLocaleTimeString('pl-PL');
-                
-                return true;
-                
-            } catch (error) {
-                console.error('Connection error:', error);
-                isConnected = false;
-                updateConnectionStatus('❌ Brak połączenia', '#e74c3c');
-                
-                // Retry after 5 seconds
-                setTimeout(() => checkConnection(), 5000);
-                return false;
-            }
-        }
-
-        async function checkStatus() {
-            if (!isConnected) {
-                await checkConnection();
-                return;
+                this.init();
             }
             
-            try {
-                const response = await fetch(`${API_URL}/api/status`);
+            init() {
+                this.elements.backendUrl.textContent = this.apiUrl;
+                this.setupEventListeners();
+                this.setupTabs();
+                this.checkConnection();
+                this.startAutoRefresh();
                 
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                // Quick helper functions
+                window.updateSliderValue = (sliderId, value) => {
+                    document.getElementById(sliderId + 'Value').textContent = value;
+                };
                 
-                const data = await response.json();
-                updateStatus(data);
-                
-                // Aktualizuj status EULA
-                eulaAccepted = data.eula_accepted || false;
-                updateEulaStatus(eulaAccepted);
-                
-                elements.lastUpdate.textContent = new Date().toLocaleTimeString('pl-PL');
-                
-            } catch (error) {
-                console.error('Status check failed:', error);
-                isConnected = false;
-                updateConnectionStatus('⚠️ Błąd połączenia', '#e74c3c');
-            }
-        }
-
-        function updateStatus(data) {
-            const status = data.status || 'unknown';
-            
-            // Aktualizuj wskaźnik statusu
-            const statusConfig = {
-                'running': {
-                    text: '🟢 SERWER DZIAŁA',
-                    class: 'działa',
-                    icon: '🟢',
-                    startBtnDisabled: true,
-                    stopBtnDisabled: false,
-                    restartBtnDisabled: false
-                },
-                'stopped': {
-                    text: '🔴 SERWER ZATRZYMANY',
-                    class: 'zatrzymany',
-                    icon: '🔴',
-                    startBtnDisabled: !eulaAccepted, // Start tylko gdy EULA zaakceptowana
-                    stopBtnDisabled: true,
-                    restartBtnDisabled: true
-                },
-                'starting': {
-                    text: '🟡 URUCHAMIANIE...',
-                    class: 'uruchamianie',
-                    icon: '🟡',
-                    startBtnDisabled: true,
-                    stopBtnDisabled: false,
-                    restartBtnDisabled: true
-                },
-                'stopping': {
-                    text: '🟡 ZATRZYMOWANIE...',
-                    class: 'uruchamianie',
-                    icon: '🟡',
-                    startBtnDisabled: true,
-                    stopBtnDisabled: true,
-                    restartBtnDisabled: true
-                },
-                'unknown': {
-                    text: '⚪ STATUS NIEZNANY',
-                    class: 'unknown',
-                    icon: '⚪',
-                    startBtnDisabled: true,
-                    stopBtnDisabled: true,
-                    restartBtnDisabled: true
-                }
-            };
-            
-            const config = statusConfig[status] || statusConfig.unknown;
-            
-            elements.statusText.textContent = config.text;
-            elements.serverStatus.className = `status ${config.class}`;
-            elements.serverStatus.querySelector('.status-icon').textContent = config.icon;
-            
-            // Aktualizuj przyciski
-            elements.startBtn.disabled = config.startBtnDisabled;
-            elements.stopBtn.disabled = config.stopBtnDisabled;
-            elements.restartBtn.disabled = config.restartBtnDisabled;
-            
-            // Aktualizuj informacje
-            elements.engineInfo.textContent = data.engine || 'Paper';
-            elements.versionInfo.textContent = data.version || '1.20.4';
-            elements.playerCount.textContent = data.player_count || 0;
-            
-            // Logi
-            if (data.logs && data.logs.length > 0) {
-                displayLogs(data.logs);
-            }
-        }
-
-        function updateEulaStatus(accepted) {
-            eulaAccepted = accepted;
-            
-            if (accepted) {
-                elements.eulaStatus.textContent = '✅ Zaakceptowana';
-                elements.eulaStatus.style.color = '#2ecc71';
-                elements.eulaWarningBox.style.display = 'none';
-                elements.currentEulaStatus.textContent = '✅ Zaakceptowana';
-                
-                // Włącz przycisk Start jeśli serwer jest zatrzymany
-                if (elements.startBtn.disabled && !elements.stopBtn.disabled) {
-                    elements.startBtn.disabled = false;
-                }
-            } else {
-                elements.eulaStatus.textContent = '❌ Wymaga akceptacji';
-                elements.eulaStatus.style.color = '#e74c3c';
-                elements.eulaWarningBox.style.display = 'block';
-                elements.currentEulaStatus.textContent = '❌ Wymaga akceptacji';
-                
-                // Wyłącz przycisk Start
-                elements.startBtn.disabled = true;
+                window.switchTab = (tabName) => {
+                    document.querySelectorAll('.tab-btn').forEach(btn => {
+                        btn.classList.toggle('active', btn.dataset.tab === tabName);
+                    });
+                    document.querySelectorAll('.tab-pane').forEach(pane => {
+                        pane.classList.toggle('active', pane.id === tabName + '-tab');
+                    });
+                };
             }
             
-            // Aktualizuj tooltip na przycisku Start
-            if (!accepted) {
-                elements.startBtn.title = 'Akceptuj EULA aby uruchomić serwer';
-            } else {
-                elements.startBtn.title = 'Uruchom serwer';
-            }
-        }
-
-        async function sendCommand(command) {
-            if (!isConnected) {
-                showNotification('Brak połączenia z serwerem API', 'error');
-                return;
-            }
-            
-            // Sprawdź EULA dla komendy start
-            if (command === 'start' && !eulaAccepted) {
-                showNotification('Musisz zaakceptować EULA przed uruchomieniem serwera', 'error');
-                showEulaModal();
-                return;
-            }
-            
-            const button = elements[`${command}Btn`];
-            const originalText = button.innerHTML;
-            const originalDisabled = button.disabled;
-            
-            button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Wysyłanie...`;
-            button.disabled = true;
-            
-            logToConsole(`Wysyłanie komendy: ${command}`, 'system');
-            
-            try {
-                const response = await fetch(`${API_URL}/api/command`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ command: command })
+            setupEventListeners() {
+                // === EULA HANDLERS ===
+                this.elements.showEulaModalBtn.addEventListener('click', () => this.showEulaModal());
+                this.elements.eulaBtn.addEventListener('click', () => this.showEulaModal());
+                this.elements.acceptEulaBtn.addEventListener('click', () => this.acceptEula());
+                this.elements.closeEulaModalBtn.addEventListener('click', () => this.hideEulaModal());
+                
+                // Zamknij modal po kliknięciu poza nim
+                this.elements.eulaModal.addEventListener('click', (e) => {
+                    if (e.target === this.elements.eulaModal) {
+                        this.hideEulaModal();
+                    }
                 });
                 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                // === BASIC CONTROLS ===
+                this.elements.startBtn.addEventListener('click', () => this.sendCommand('start'));
+                this.elements.stopBtn.addEventListener('click', () => this.sendCommand('stop'));
+                this.elements.restartBtn.addEventListener('click', () => this.sendCommand('restart'));
+                
+                this.elements.sendBtn.addEventListener('click', () => this.sendConsoleCommand());
+                this.elements.clearBtn.addEventListener('click', () => this.clearConsole());
+                this.elements.refreshConsoleBtn.addEventListener('click', () => this.checkStatus());
+                
+                this.elements.commandInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.sendConsoleCommand();
+                });
+                
+                // === VERSION MANAGER ===
+                this.elements.engineButtons.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const engine = e.currentTarget.dataset.engine;
+                        this.selectEngine(engine);
+                    });
+                });
+                
+                this.elements.downloadBtn.addEventListener('click', () => this.downloadVersion());
+                
+                // === FILE MANAGER ===
+                this.elements.backBtn.addEventListener('click', () => this.navigateUp());
+                this.elements.uploadBtn.addEventListener('click', () => this.elements.hiddenFileUpload.click());
+                this.elements.deleteBtn.addEventListener('click', () => this.deleteFile());
+                this.elements.refreshFilesBtn.addEventListener('click', () => this.listFiles(this.currentFilePath));
+                this.elements.saveFileBtn.addEventListener('click', () => this.saveFile());
+                this.elements.downloadFileBtn.addEventListener('click', () => this.downloadCurrentFile());
+                this.elements.hiddenFileUpload.addEventListener('change', (e) => this.uploadFiles(e.target.files));
+                
+                // === SETTINGS ===
+                this.elements.saveSettingsBtn.addEventListener('click', () => this.saveSettings());
+                
+                // === PLUGINS ===
+                this.elements.browsePluginsBtn.addEventListener('click', () => this.elements.pluginUpload.click());
+                this.elements.pluginUpload.addEventListener('change', (e) => this.uploadPlugins(e.target.files));
+                
+                // === TABS ===
+                this.setupTabs();
+            }
+            
+            setupTabs() {
+                this.elements.tabButtons.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        // Remove active from all
+                        this.elements.tabButtons.forEach(b => b.classList.remove('active'));
+                        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                        
+                        // Add active to clicked
+                        const tab = e.currentTarget.dataset.tab;
+                        e.currentTarget.classList.add('active');
+                        document.getElementById(`${tab}-tab`).classList.add('active');
+                        
+                        // Load tab data
+                        this.loadTabData(tab);
+                    });
+                });
+            }
+            
+            loadTabData(tab) {
+                switch(tab) {
+                    case 'console':
+                        // Logi są już ładowane przez auto-refresh
+                        break;
+                    case 'version':
+                        this.loadAvailableVersions();
+                        break;
+                    case 'files':
+                        this.listFiles('/');
+                        break;
+                    case 'settings':
+                        this.loadSettings();
+                        break;
+                    case 'plugins':
+                        this.loadPlugins();
+                        break;
+                }
+            }
+            
+            // === EULA FUNCTIONS ===
+            showEulaModal() {
+                this.elements.eulaModal.classList.add('active');
+                this.elements.modalEulaStatus.textContent = this.eulaAccepted ? '✅ Zaakceptowana' : '❌ Wymaga akceptacji';
+                document.body.style.overflow = 'hidden';
+            }
+            
+            hideEulaModal() {
+                this.elements.eulaModal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+            
+            async acceptEula() {
+                if (!this.isConnected) {
+                    this.showNotification('Brak połączenia z serwerem', 'error');
+                    return;
                 }
                 
-                const data = await response.json();
+                this.logToConsole('Akceptowanie EULA...', 'system');
                 
-                if (data.success) {
-                    showNotification(data.message, 'success');
-                    logToConsole(`✅ ${data.message}`, 'success');
+                try {
+                    const response = await fetch(`${this.apiUrl}/api/eula/accept`, {
+                        method: 'POST'
+                    });
+                    
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.showNotification('✅ EULA zaakceptowana!', 'success');
+                        this.logToConsole('✅ EULA zaakceptowana', 'success');
+                        
+                        // Update EULA status
+                        this.eulaAccepted = true;
+                        this.updateEulaStatus(true);
+                        
+                        // Close modal after delay
+                        setTimeout(() => this.hideEulaModal(), 1500);
+                        
+                        // Refresh status
+                        setTimeout(() => this.checkStatus(), 1000);
+                        
+                    } else {
+                        this.showNotification(`❌ ${data.message}`, 'error');
+                        this.logToConsole(`❌ ${data.message}`, 'error');
+                    }
+                    
+                } catch (error) {
+                    this.showNotification(`Błąd: ${error.message}`, 'error');
+                    this.logToConsole(`❌ Błąd akceptacji EULA: ${error.message}`, 'error');
+                }
+            }
+            
+            updateEulaStatus(accepted) {
+                this.eulaAccepted = accepted;
+                
+                if (accepted) {
+                    this.elements.eulaStatusText.textContent = '✅ Zaakceptowana';
+                    this.elements.eulaStatusText.style.color = '#2ecc71';
+                    this.elements.eulaWarningBox.style.display = 'none';
+                    this.elements.modalEulaStatus.textContent = '✅ Zaakceptowana';
+                    
+                    // Enable start button if server is stopped
+                    if (this.elements.startBtn.disabled) {
+                        this.elements.startBtn.disabled = false;
+                    }
                 } else {
-                    showNotification(data.message, 'error');
-                    logToConsole(`❌ ${data.message}`, 'error');
+                    this.elements.eulaStatusText.textContent = '❌ Wymaga akceptacji';
+                    this.elements.eulaStatusText.style.color = '#e74c3c';
+                    this.elements.eulaWarningBox.style.display = 'block';
+                    this.elements.modalEulaStatus.textContent = '❌ Wymaga akceptacji';
+                    
+                    // Disable start button
+                    this.elements.startBtn.disabled = true;
+                    this.elements.startBtn.title = 'Akceptuj EULA aby uruchomić serwer';
+                }
+            }
+            
+            // === CONNECTION FUNCTIONS ===
+            async checkConnection() {
+                try {
+                    this.updateConnectionStatus('⌛ Łączenie...', '#f39c12');
+                    
+                    const response = await fetch(`${this.apiUrl}/api/status`);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.isConnected = true;
+                        this.updateConnectionStatus('✅ Połączono', '#2ecc71');
+                        this.logToConsole('✓ Połączono z backendem', 'system');
+                        this.updateStatus(data);
+                        
+                        // Update EULA status
+                        this.eulaAccepted = data.eula_accepted || false;
+                        this.updateEulaStatus(this.eulaAccepted);
+                        
+                        this.elements.lastCheck.textContent = new Date().toLocaleTimeString('pl-PL');
+                        
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    
+                } catch (error) {
+                    this.isConnected = false;
+                    this.updateConnectionStatus('❌ Brak połączenia', '#e74c3c');
+                    this.logToConsole(`✗ Błąd: ${error.message}`, 'error');
+                    
+                    setTimeout(() => this.checkConnection(), 3000);
+                }
+            }
+            
+            async checkStatus() {
+                if (!this.isConnected) {
+                    await this.checkConnection();
+                    return;
                 }
                 
-                // Odśwież status po komendzie
-                setTimeout(() => checkStatus(), 2000);
+                try {
+                    const response = await fetch(`${this.apiUrl}/api/status`);
+                    
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    
+                    const data = await response.json();
+                    this.updateStatus(data);
+                    
+                    // Update EULA status
+                    this.eulaAccepted = data.eula_accepted || false;
+                    this.updateEulaStatus(this.eulaAccepted);
+                    
+                    this.elements.lastCheck.textContent = new Date().toLocaleTimeString('pl-PL');
+                    
+                } catch (error) {
+                    this.logToConsole(`Błąd sprawdzania statusu: ${error.message}`, 'error');
+                    this.updateConnectionStatus('⚠️ Błąd połączenia', '#e74c3c');
+                    this.isConnected = false;
+                }
+            }
+            
+            // === SERVER CONTROL ===
+            async sendCommand(command) {
+                if (!this.isConnected) {
+                    this.showNotification('Brak połączenia z serwerem', 'error');
+                    return;
+                }
                 
-            } catch (error) {
-                console.error('Command error:', error);
-                showNotification(`Błąd: ${error.message}`, 'error');
-                logToConsole(`❌ Błąd: ${error.message}`, 'error');
+                // Check EULA for start command
+                if (command === 'start' && !this.eulaAccepted) {
+                    this.showNotification('Musisz zaakceptować EULA przed uruchomieniem serwera', 'error');
+                    this.showEulaModal();
+                    return;
+                }
                 
-            } finally {
+                const button = this.elements[`${command}Btn`];
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                button.disabled = true;
+                
+                this.logToConsole(`Wysyłanie komendy: ${command}`, 'system');
+                
+                try {
+                    const response = await fetch(`${this.apiUrl}/api/command`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ command: command })
+                    });
+                    
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    
+                    const data = await response.json();
+                    this.showNotification(data.message, data.success ? 'success' : 'error');
+                    this.logToConsole(data.message, data.success ? 'success' : 'error');
+                    
+                    setTimeout(() => this.checkStatus(), 2000);
+                    
+                } catch (error) {
+                    this.showNotification(`Błąd: ${error.message}`, 'error');
+                    this.logToConsole(`Błąd: ${error.message}`, 'error');
+                } finally {
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }, 1500);
+                }
+            }
+            
+            async sendConsoleCommand() {
+                const command = this.elements.commandInput.value.trim();
+                if (!command || !this.isConnected) return;
+                
+                this.logToConsole(`> ${command}`, 'system');
+                
+                try {
+                    const response = await fetch(`${this.apiUrl}/api/command`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ command: command })
+                    });
+                    
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    
+                    const data = await response.json();
+                    this.logToConsole(data.message, 'info');
+                    
+                    this.elements.commandInput.value = '';
+                    setTimeout(() => this.checkStatus(), 1000);
+                    
+                } catch (error) {
+                    this.logToConsole(`Błąd: ${error.message}`, 'error');
+                }
+            }
+            
+            updateStatus(data) {
+                const status = data.status || 'unknown';
+                
+                // Update indicator
+                this.elements.statusIndicator.className = 'status-indicator ' + status;
+                
+                // Update text
+                const statusConfig = {
+                    'running': {
+                        title: '🟢 SERWER DZIAŁA',
+                        details: 'Minecraft server is active',
+                        color: '#2ecc71'
+                    },
+                    'stopped': {
+                        title: '🔴 SERWER ZATRZYMANY',
+                        details: 'Server is stopped',
+                        color: '#e74c3c'
+                    },
+                    'starting': {
+                        title: '🟡 URUCHAMIANIE...',
+                        details: 'Server is starting up',
+                        color: '#f39c12'
+                    },
+                    'stopping': {
+                        title: '🟡 ZATRZYMOWANIE...',
+                        details: 'Server is stopping',
+                        color: '#f39c12'
+                    }
+                };
+                
+                const config = statusConfig[status] || {
+                    title: '⚪ STATUS',
+                    details: 'Cannot determine status',
+                    color: '#95a5a6'
+                };
+                
+                this.elements.statusTitle.textContent = config.title;
+                this.elements.statusDetails.textContent = config.details;
+                this.elements.statusTitle.style.color = config.color;
+                
+                // Players
+                this.elements.playerCount.textContent = data.player_count || 0;
+                
+                // Engine and version
+                if (data.engine) {
+                    this.elements.currentEngine.textContent = data.engine;
+                    this.currentEngine = data.engine;
+                }
+                if (data.version) {
+                    this.elements.currentVersion.textContent = data.version;
+                    this.currentVersion = data.version;
+                }
+                
+                // Logs
+                if (data.logs && data.logs.length > 0) {
+                    this.displayLogs(data.logs);
+                }
+            }
+            
+            // === VERSION MANAGER ===
+            async selectEngine(engine) {
+                this.currentEngine = engine;
+                
+                // Update buttons
+                this.elements.engineButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.engine === engine);
+                });
+                
+                // Load versions for this engine
+                await this.loadAvailableVersions(engine);
+            }
+            
+            async loadAvailableVersions(engine = this.currentEngine) {
+                try {
+                    this.logToConsole(`Ładowanie wersji dla ${engine}...`, 'system');
+                    
+                    const response = await fetch(`${this.apiUrl}/api/versions/available?engine=${engine}`);
+                    const data = await response.json();
+                    
+                    const select = this.elements.versionSelect;
+                    select.innerHTML = '';
+                    
+                    if (data.versions && data.versions.length > 0) {
+                        data.versions.forEach(version => {
+                            const option = document.createElement('option');
+                            option.value = version;
+                            option.textContent = version;
+                            select.appendChild(option);
+                        });
+                        
+                        // Select latest or current
+                        const currentVersion = data.latest || data.versions[data.versions.length - 1];
+                        select.value = currentVersion;
+                        
+                        this.updateJavaRequirement(currentVersion);
+                    } else {
+                        select.innerHTML = '<option value="">Brak dostępnych wersji</option>';
+                    }
+                    
+                } catch (error) {
+                    this.logToConsole(`Błąd ładowania wersji: ${error.message}`, 'error');
+                    this.elements.versionSelect.innerHTML = '<option value="">Błąd ładowania wersji</option>';
+                }
+            }
+            
+            async updateJavaRequirement(version) {
+                try {
+                    const response = await fetch(`${this.apiUrl}/api/java/info?version=${version}&engine=${this.currentEngine}`);
+                    const data = await response.json();
+                    
+                    this.elements.javaRequirement.innerHTML = `
+                        <strong>Wymagana Java:</strong> ${data.required}
+                    `;
+                    
+                } catch (error) {
+                    this.elements.javaRequirement.innerHTML = `<strong>Wymagana Java:</strong> Java 17+ (szacowane)`;
+                }
+            }
+            
+            async downloadVersion() {
+                const version = this.elements.versionSelect.value;
+                if (!version) {
+                    this.showNotification('Wybierz wersję najpierw', 'error');
+                    return;
+                }
+                
+                if (!confirm(`Pobrać i zainstalować ${this.currentEngine} ${version}?\nSerwer zostanie zatrzymany jeśli działa.`)) {
+                    return;
+                }
+                
+                this.elements.downloadProgress.style.display = 'block';
+                this.elements.progressFill.style.width = '0%';
+                this.elements.progressText.textContent = 'Rozpoczynanie pobierania...';
+                
+                this.logToConsole(`Pobieranie ${this.currentEngine} ${version}...`, 'system');
+                
+                try {
+                    const response = await fetch(`${this.apiUrl}/api/versions/download`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            engine: this.currentEngine,
+                            version: version
+                        })
+                    });
+                    
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    
+                    // Track progress
+                    const progressInterval = setInterval(async () => {
+                        try {
+                            const progressResp = await fetch(`${this.apiUrl}/api/versions/progress`);
+                            const progressData = await progressResp.json();
+                            
+                            this.elements.progressFill.style.width = `${progressData.progress}%`;
+                            this.elements.progressText.textContent = `Pobieranie... ${Math.round(progressData.progress)}%`;
+                            
+                            if (progressData.progress >= 100) {
+                                clearInterval(progressInterval);
+                                
+                                const data = await response.json();
+                                this.showNotification(`✅ Pobrano ${this.currentEngine} ${version}`, 'success');
+                                this.logToConsole(`✅ ${data.message}`, 'info');
+                                
+                                // Update status
+                                this.currentVersion = version;
+                                this.elements.currentVersion.textContent = version;
+                                this.checkStatus();
+                                
+                                setTimeout(() => {
+                                    this.elements.downloadProgress.style.display = 'none';
+                                }, 2000);
+                            }
+                        } catch (e) {
+                            // Ignore progress errors
+                        }
+                    }, 500);
+                    
+                } catch (error) {
+                    this.showNotification(`Błąd pobierania: ${error.message}`, 'error');
+                    this.logToConsole(`❌ Błąd pobierania: ${error.message}`, 'error');
+                    this.elements.downloadProgress.style.display = 'none';
+                }
+            }
+            
+            // === FILE MANAGER ===
+            async listFiles(path = '/') {
+                this.currentFilePath = path;
+                this.elements.filePath.textContent = path;
+                
+                try {
+                    const response = await fetch(`${this.apiUrl}/api/files/list?path=${encodeURIComponent(path)}`);
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        this.showNotification(data.error, 'error');
+                        return;
+                    }
+                    
+                    let html = '';
+                    
+                    // Add parent directory if not root
+                    if (path !== '/') {
+                        const parent = path.split('/').slice(0, -1).join('/') || '/';
+                        html += `
+                            <div class="file-item" data-path="${parent}" data-type="folder">
+                                <i class="fas fa-folder"></i>
+                                <span>.. (wróć)</span>
+                            </div>
+                        `;
+                    }
+                    
+                    // Add files and folders
+                    (data.files || []).forEach(file => {
+                        const icon = file.type === 'folder' ? 'fas fa-folder' : this.getFileIcon(file.name);
+                        html += `
+                            <div class="file-item" data-path="${file.path}" data-type="${file.type}" data-name="${file.name}">
+                                <i class="${icon}"></i>
+                                <span>${file.name}</span>
+                                ${file.type === 'file' ? `<small>(${this.formatSize(file.size)})</small>` : ''}
+                            </div>
+                        `;
+                    });
+                    
+                    this.elements.fileList.innerHTML = html || '<p style="color: var(--gray); text-align: center;">Pusty folder</p>';
+                    
+                    // Add click listeners
+                    this.elements.fileList.querySelectorAll('.file-item').forEach(item => {
+                        item.addEventListener('click', () => {
+                            const path = item.dataset.path;
+                            const type = item.dataset.type;
+                            
+                            if (type === 'folder') {
+                                this.listFiles(path);
+                            } else {
+                                this.openFile(path, item.dataset.name);
+                            }
+                        });
+                    });
+                    
+                } catch (error) {
+                    this.showNotification(`Błąd ładowania plików: ${error.message}`, 'error');
+                }
+            }
+            
+            async openFile(path, name) {
+                try {
+                    const response = await fetch(`${this.apiUrl}/api/files/read?file=${encodeURIComponent(path)}`);
+                    const data = await response.json();
+                    
+                    if (data.error) throw new Error(data.error);
+                    
+                    this.currentFilePath = path;
+                    this.fileContentOriginal = data.content;
+                    
+                    this.elements.fileContent.value = data.content;
+                    this.elements.fileContent.readOnly = false;
+                    this.elements.saveFileBtn.style.display = 'block';
+                    this.elements.downloadFileBtn.style.display = 'block';
+                    
+                } catch (error) {
+                    this.showNotification(`Nie można otworzyć pliku: ${error.message}`, 'error');
+                }
+            }
+            
+            async saveFile() {
+                if (!this.currentFilePath) return;
+                
+                const content = this.elements.fileContent.value;
+                
+                try {
+                    const response = await fetch(`${this.apiUrl}/api/files/write`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            path: this.currentFilePath,
+                            content: content
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.showNotification('Plik zapisany', 'success');
+                        this.fileContentOriginal = content;
+                    } else {
+                        this.showNotification(`Błąd zapisu: ${data.error}`, 'error');
+                    }
+                    
+                } catch (error) {
+                    this.showNotification(`Błąd zapisu: ${error.message}`, 'error');
+                }
+            }
+            
+            async downloadCurrentFile() {
+                if (!this.currentFilePath) return;
+                
+                // This would need backend support for file downloads
+                this.showNotification('Pobieranie plików wymaga implementacji backendu', 'warning');
+            }
+            
+            navigateUp() {
+                if (this.currentFilePath !== '/') {
+                    const parent = this.currentFilePath.split('/').slice(0, -1).join('/') || '/';
+                    this.listFiles(parent);
+                }
+            }
+            
+            async uploadFiles(files) {
+                if (!files || files.length === 0) return;
+                
+                const formData = new FormData();
+                for (let file of files) {
+                    formData.append('file', file);
+                }
+                formData.append('folder', this.currentFilePath);
+                
+                try {
+                    const response = await fetch(`${this.apiUrl}/api/files/upload`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.showNotification(`Wgrano ${files.length} plik(ów)`, 'success');
+                        this.listFiles(this.currentFilePath);
+                    } else {
+                        this.showNotification(`Błąd wgrywania: ${data.error}`, 'error');
+                    }
+                    
+                } catch (error) {
+                    this.showNotification(`Błąd wgrywania: ${error.message}`, 'error');
+                }
+            }
+            
+            async deleteFile() {
+                if (!this.currentFilePath || this.currentFilePath === '/') {
+                    this.showNotification('Wybierz plik do usunięcia', 'error');
+                    return;
+                }
+                
+                if (!confirm(`Usunąć ${this.currentFilePath.split('/').pop()}?`)) {
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`${this.apiUrl}/api/files/delete`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ path: this.currentFilePath })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.showNotification('Plik usunięty', 'success');
+                        const parent = this.currentFilePath.split('/').slice(0, -1).join('/') || '/';
+                        this.listFiles(parent);
+                        this.elements.fileContent.value = '';
+                        this.elements.saveFileBtn.style.display = 'none';
+                        this.elements.downloadFileBtn.style.display = 'none';
+                    } else {
+                        this.showNotification(`Błąd usuwania: ${data.error}`, 'error');
+                    }
+                    
+                } catch (error) {
+                    this.showNotification(`Błąd usuwania: ${error.message}`, 'error');
+                }
+            }
+            
+            // === SETTINGS ===
+            async loadSettings() {
+                // This would load current settings from backend
+                // For now, just display the form
+            }
+            
+            async saveSettings() {
+                const settings = {
+                    'max-players': document.getElementById('maxPlayers').value,
+                    'gamemode': document.getElementById('gamemode').value,
+                    'difficulty': document.getElementById('difficulty').value,
+                    'view-distance': document.getElementById('viewDistance').value,
+                    'motd': document.getElementById('motd').value,
+                    'pvp': document.getElementById('pvp').checked ? 'true' : 'false',
+                    'enable-command-block': document.getElementById('commandBlocks').checked ? 'true' : 'false',
+                    'online-mode': document.getElementById('onlineMode').checked ? 'true' : 'false',
+                    'white-list': document.getElementById('whiteList').checked ? 'true' : 'false'
+                };
+                
+                const password = document.getElementById('serverPassword').value;
+                if (password) {
+                    settings['rcon.password'] = password;
+                }
+                
+                try {
+                    const response = await fetch(`${this.apiUrl}/api/server/settings`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ settings })
+                    });
+                    
+                    const data = await response.json();
+                    this.showNotification(data.success ? 'Zapisano ustawienia!' : data.error, 
+                                        data.success ? 'success' : 'error');
+                    
+                } catch (error) {
+                    this.showNotification(`Błąd zapisu: ${error.message}`, 'error');
+                }
+            }
+            
+            // === PLUGINS ===
+            async loadPlugins() {
+                try {
+                    const response = await fetch(`${this.apiUrl}/api/plugins/list`);
+                    const data = await response.json();
+                    
+                    let html = '';
+                    (data.plugins || []).forEach(plugin => {
+                        html += `
+                            <div style="padding: 10px; background: rgba(30, 30, 60, 0.8); 
+                                       margin-bottom: 5px; border-radius: 8px;">
+                                <strong>${plugin.name}</strong>
+                                <small style="color: var(--gray); display: block;">
+                                    ${this.formatSize(plugin.size)}
+                                </small>
+                            </div>
+                        `;
+                    });
+                    
+                    this.elements.pluginsList.innerHTML = html || 
+                        '<p style="color: var(--gray); text-align: center;">Brak pluginów</p>';
+                    
+                } catch (error) {
+                    this.elements.pluginsList.innerHTML = '<p style="color: var(--gray); text-align: center;">Błąd ładowania pluginów</p>';
+                }
+            }
+            
+            async uploadPlugins(files) {
+                const jarFiles = Array.from(files).filter(f => f.name.endsWith('.jar'));
+                if (!jarFiles.length) return;
+                
+                const formData = new FormData();
+                jarFiles.forEach(file => formData.append('file', file));
+                formData.append('folder', 'plugins');
+                
+                try {
+                    const response = await fetch(`${this.apiUrl}/api/files/upload`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    this.showNotification(data.success ? 
+                        `Wgrano ${jarFiles.length} plugin(ów)` : data.error, 
+                        data.success ? 'success' : 'error');
+                    
+                    if (data.success) {
+                        this.loadPlugins();
+                    }
+                    
+                } catch (error) {
+                    this.showNotification(`Błąd wgrywania pluginów: ${error.message}`, 'error');
+                }
+            }
+            
+            // === HELPER FUNCTIONS ===
+            displayLogs(logs) {
+                const consoleEl = this.elements.consoleOutput;
+                const loading = consoleEl.querySelector('.loading');
+                if (loading) loading.style.display = 'none';
+                
+                let html = '';
+                logs.forEach(log => {
+                    const type = this.getLogType(log);
+                    html += `<div class="log-${type}">${this.escapeHtml(log)}</div>`;
+                });
+                
+                consoleEl.innerHTML = html;
+                consoleEl.scrollTop = consoleEl.scrollHeight;
+            }
+            
+            logToConsole(message, type = 'info') {
+                const consoleEl = this.elements.consoleOutput;
+                const loading = consoleEl.querySelector('.loading');
+                if (loading) loading.style.display = 'none';
+                
+                const timestamp = new Date().toLocaleTimeString('pl-PL');
+                const logEntry = `[${timestamp}] ${message}`;
+                
+                const div = document.createElement('div');
+                div.className = `log-${type}`;
+                div.textContent = logEntry;
+                
+                consoleEl.appendChild(div);
+                consoleEl.scrollTop = consoleEl.scrollHeight;
+                
+                // Limit to 200 lines
+                while (consoleEl.children.length > 200) {
+                    consoleEl.removeChild(consoleEl.firstChild);
+                }
+            }
+            
+            clearConsole() {
+                this.elements.consoleOutput.innerHTML = 
+                    '<div class="loading"><div class="spinner"></div><p>Konsola wyczyszczona</p></div>';
+            }
+            
+            updateConnectionStatus(text, color) {
+                const el = this.elements.connectionStatus;
+                el.textContent = ` ${text}`;
+                el.className = `connection-status ${text.includes('Połączono') ? 'status-connected' : 'status-disconnected'}`;
+                el.style.backgroundColor = color + '20';
+                el.style.color = color;
+            }
+            
+            startAutoRefresh() {
+                if (this.refreshInterval) clearInterval(this.refreshInterval);
+                
+                this.refreshInterval = setInterval(() => {
+                    if (this.isConnected) {
+                        this.checkStatus();
+                    }
+                }, 5000);
+            }
+            
+            showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = 'notification ' + type;
+                notification.innerHTML = `
+                    <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation' : 'info'}"></i>
+                    ${message}
+                `;
+                
+                document.body.appendChild(notification);
+                
                 setTimeout(() => {
-                    button.innerHTML = originalText;
-                    button.disabled = originalDisabled;
-                }, 1000);
-            }
-        }
-
-        async function sendCustomCommand() {
-            const command = elements.commandInput.value.trim();
-            if (!command || !isConnected) return;
-            
-            logToConsole(`> ${command}`, 'system');
-            
-            try {
-                const response = await fetch(`${API_URL}/api/command`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ command: command })
-                });
-                
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                
-                const data = await response.json();
-                logToConsole(`📨 ${data.message}`, 'info');
-                
-                elements.commandInput.value = '';
-                setTimeout(() => checkStatus(), 1000);
-                
-            } catch (error) {
-                logToConsole(`❌ Błąd: ${error.message}`, 'error');
-            }
-        }
-
-        async function acceptEula() {
-            if (!isConnected) {
-                showNotification('Brak połączenia z serwerem API', 'error');
-                return;
-            }
-            
-            logToConsole('Akceptowanie EULA...', 'system');
-            
-            try {
-                const response = await fetch(`${API_URL}/api/eula/accept`, {
-                    method: 'POST'
-                });
-                
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    showNotification('✅ EULA zaakceptowana! Możesz teraz uruchomić serwer.', 'success');
-                    logToConsole('✅ EULA zaakceptowana', 'success');
-                    
-                    // Aktualizuj status EULA
-                    eulaAccepted = true;
-                    updateEulaStatus(true);
-                    
-                    // Zamknij modal
-                    setTimeout(() => hideEulaModal(), 1500);
-                    
-                    // Odśwież status serwera
-                    setTimeout(() => checkStatus(), 1000);
-                    
-                } else {
-                    showNotification(`❌ ${data.message}`, 'error');
-                    logToConsole(`❌ ${data.message}`, 'error');
-                }
-                
-            } catch (error) {
-                console.error('EULA acceptance error:', error);
-                showNotification(`Błąd akceptacji EULA: ${error.message}`, 'error');
-                logToConsole(`❌ Błąd: ${error.message}`, 'error');
-            }
-        }
-
-        function displayLogs(logs) {
-            const consoleEl = elements.consoleLog;
-            
-            // Usuń loading spinner jeśli istnieje
-            const loadingDiv = consoleEl.querySelector('.loading');
-            if (loadingDiv) {
-                loadingDiv.style.display = 'none';
-            }
-            
-            let html = '';
-            logs.forEach(log => {
-                const type = getLogType(log);
-                html += `<div class="log-${type}">${escapeHtml(log)}</div>`;
-            });
-            
-            consoleEl.innerHTML = html;
-            
-            // Auto-scroll do dołu
-            consoleEl.scrollTop = consoleEl.scrollHeight;
-        }
-
-        function logToConsole(message, type = 'info') {
-            const consoleEl = elements.consoleLog;
-            
-            // Usuń loading spinner jeśli istnieje
-            const loadingDiv = consoleEl.querySelector('.loading');
-            if (loadingDiv) {
-                loadingDiv.style.display = 'none';
-            }
-            
-            const timestamp = new Date().toLocaleTimeString('pl-PL');
-            const logEntry = `[${timestamp}] ${message}`;
-            
-            const logDiv = document.createElement('div');
-            logDiv.className = `log-${type}`;
-            logDiv.textContent = logEntry;
-            
-            consoleEl.appendChild(logDiv);
-            
-            // Auto-scroll do dołu
-            consoleEl.scrollTop = consoleEl.scrollHeight;
-            
-            // Ogranicz do 200 linii
-            const lines = consoleEl.children;
-            if (lines.length > 200) {
-                for (let i = 0; i < lines.length - 200; i++) {
-                    consoleEl.removeChild(lines[i]);
-                }
-            }
-        }
-
-        function clearConsole() {
-            elements.consoleLog.innerHTML = '<div class="loading"><div class="spinner"></div><p>Konsola wyczyszczona</p></div>';
-            logToConsole('Konsola wyczyszczona', 'system');
-        }
-
-        function getLogType(log) {
-            const l = log.toLowerCase();
-            if (l.includes('error') || l.includes('failed') || l.includes('exception')) {
-                return 'error';
-            } else if (l.includes('warning') || l.includes('warn')) {
-                return 'warning';
-            } else if (l.includes('success') || l.includes('done') || l.includes('✅')) {
-                return 'success';
-            } else if (l.includes('joined') || l.includes('left') || l.includes('player')) {
-                return 'system';
-            } else if (l.includes('info') || l.includes('[info]')) {
-                return 'info';
-            }
-            return 'info';
-        }
-
-        function updateConnectionStatus(text, color) {
-            elements.connectionStatus.textContent = ` ${text}`;
-            elements.connectionStatus.style.color = color;
-            elements.connectionStatus.style.borderColor = color;
-        }
-
-        function startAutoRefresh() {
-            if (refreshInterval) clearInterval(refreshInterval);
-            
-            if (autoRefreshEnabled) {
-                refreshInterval = setInterval(() => {
-                    if (isConnected) {
-                        checkStatus();
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
                     }
                 }, 3000);
             }
-        }
-
-        function stopAutoRefresh() {
-            if (refreshInterval) {
-                clearInterval(refreshInterval);
-                refreshInterval = null;
+            
+            getLogType(log) {
+                const l = log.toLowerCase();
+                if (l.includes('error') || l.includes('failed')) return 'error';
+                if (l.includes('warning') || l.includes('warn')) return 'warning';
+                if (l.includes('success') || l.includes('✅')) return 'success';
+                if (l.includes('joined') || l.includes('left') || l.includes('player')) return 'system';
+                return 'info';
+            }
+            
+            getFileIcon(filename) {
+                const ext = filename.split('.').pop().toLowerCase();
+                
+                switch(ext) {
+                    case 'jar': return 'fas fa-archive';
+                    case 'yml': case 'yaml': case 'properties': case 'json': case 'txt': case 'log':
+                        return 'fas fa-file-alt';
+                    case 'zip': case 'tar': case 'gz': return 'fas fa-file-archive';
+                    case 'png': case 'jpg': case 'jpeg': case 'gif': return 'fas fa-file-image';
+                    case 'dat': case 'mca': case 'mcr': return 'fas fa-database';
+                    default: return 'fas fa-file';
+                }
+            }
+            
+            formatSize(bytes) {
+                if (bytes === 0) return '0 B';
+                const k = 1024;
+                const sizes = ['B', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+            }
+            
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
             }
         }
-
-        function showNotification(message, type = 'info') {
-            // Usuń istniejące notyfikacje
-            document.querySelectorAll('.notification').forEach(n => n.remove());
+        
+        // Initialize controller when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.controller = new MinecraftController();
             
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
-                ${message}
-            `;
+            console.log('🎮 Minecraft Control Panel loaded!');
+            console.log('API URL:', window.controller.apiUrl);
             
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.remove();
+            // Prevent zoom on double-tap
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(event) {
+                const now = (new Date()).getTime();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
                 }
-            }, 3000);
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
+                lastTouchEnd = now;
+            }, false);
+        });
     </script>
 </body>
 </html>
