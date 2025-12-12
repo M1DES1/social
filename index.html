@@ -42,7 +42,7 @@
             <div class="status-card">
                 <h3>📊 Status serwera</h3>
                 <p>Wersja: <strong>Paper 1.20.4</strong></p>
-                <p>Port Minecraft: <code>25565</code></p>
+                <p>Port Minecraft: <code>5718</code></p> <!-- Zmieniono z 25565 na 5718 zgodnie z Twoją konfiguracją -->
                 <p>Status: <span id="statusIndicator" class="status-offline">OFFLINE</span></p>
                 <p>Gracze online: <span id="playerCount">0</span>/5</p>
                 <p>API Panelu: <span id="apiStatus" class="status-offline">nieaktywne</span></p>
@@ -73,10 +73,8 @@
 
     <script>
         // 🔧 KONFIGURACJA - TUTAJ WPISZ SWÓJ ADRES API
-        // Po uruchomieniu playit.gg, znajdź adres dla portu 3000 i wklej tutaj
-       const API_BASE_URL = 'https://unexcusing-brysen-unmetalised.ngrok-free.dev';
-        // Lub dla lokalnego testu w Codespace:
-        // const API_BASE_URL = 'http://localhost:3000';
+        // Adres Twojej usługi webowej na Render.com
+        const API_BASE_URL = 'https://twoja-usluga.onrender.com'; // 👈 ZASTĄP TYM ADRESEM
 
         let consoleElement = document.getElementById('console');
         
@@ -98,6 +96,11 @@
                     headers: {'Content-Type': 'application/json'}
                 });
                 
+                // Sprawdź, czy odpowiedź jest OK (status 200-299)
+                if (!response.ok) {
+                    throw new Error(`API zwróciło błąd HTTP: ${response.status}`);
+                }
+                
                 const data = await response.json();
                 logToConsole(`Odpowiedź: ${data.message}`, data.success ? 'success' : 'error');
                 
@@ -113,6 +116,11 @@
         async function checkServerStatus() {
             try {
                 const response = await fetch(`${API_BASE_URL}/status`);
+                
+                if (!response.ok) {
+                    throw new Error(`Status API zwrócił błąd: ${response.status}`);
+                }
+                
                 const data = await response.json();
                 
                 const statusIndicator = document.getElementById('statusIndicator');
@@ -139,8 +147,9 @@
                 playerCount.textContent = data.players || 0;
             } catch (error) {
                 logToConsole('Nie można połączyć się z API panelu', 'error');
-                document.getElementById('apiStatus').textContent = 'błąd połączenia';
-                document.getElementById('apiStatus').className = 'status-offline';
+                const apiStatusEl = document.getElementById('apiStatus');
+                apiStatusEl.textContent = 'błąd połączenia';
+                apiStatusEl.className = 'status-offline';
             }
         }
         
