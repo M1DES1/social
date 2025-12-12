@@ -1,15 +1,18 @@
 {
-  "name": "minecraft-panel-api",
+  "name": "minecraft-server-backend",
   "version": "1.0.0",
-  "description": "API do zarządzania serwerem Minecraft",
-  "main": "panel-api.js",
+  "description": "Backend do kontroli serwera Minecraft",
+  "main": "server.js",
   "scripts": {
-    "start": "node panel-api.js"
+    "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "node-fetch": "^2.6.9",
+    "body-parser": "^1.20.2"
   },
   "engines": {
-    "node": "18.x"
+    "node": ">=16.0.0"
   }
 }
