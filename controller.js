@@ -1,14 +1,14 @@
 class MinecraftController {
     constructor() {
-        // 🔧 TU WPISZ SWÓJ ADRES WEB SOCKET Z CODESPACES
-        // Znajdziesz go w zakładce "Ports" w Codespace - publiczny URL dla portu 8765
-        this.wsUrl = "wss://YOUR-CODESPACE-URL.app.github.dev";  // ← ZMIEŃ TO!
-        this.ws = null;
-        this.reconnectInterval = null;
-        this.autoReconnect = true;
+        // 🔧 TU WPISZ SWÓJ ADRES HTTP Z CODESPACES
+        // Przykład: https://xxxx-8080.app.github.dev
+        this.apiUrl = "https://xxxx-8080.app.github.dev";  // ← ZMIEŃ TO!
+        
+        this.autoRefresh = true;
+        this.refreshInterval = null;
         
         this.elements = {
-            statusIndicator: document.getElementById('statusIndicator'),
+            statusPanel: document.getElementById('statusPanel'),
             statusText: document.getElementById('statusText'),
             statusDetails: document.getElementById('statusDetails'),
             startBtn: document.getElementById('startBtn'),
@@ -18,126 +18,199 @@ class MinecraftController {
             commandInput: document.getElementById('commandInput'),
             sendBtn: document.getElementById('sendBtn'),
             clearBtn: document.getElementById('clearBtn'),
-            connectBtn: document.getElementById('connectBtn'),
+            refreshBtn: document.getElementById('refreshBtn'),
             connectionStatus: document.getElementById('connectionStatus'),
-            wsUrl: document.getElementById('wsUrl')
+            backendUrl: document.getElementById('backendUrl')
         };
         
         this.init();
     }
     
     init() {
-        this.elements.wsUrl.textContent = this.wsUrl;
+        this.elements.backendUrl.textContent = this.apiUrl;
         this.setupEventListeners();
-        this.connect();
-        
-        // Auto-reconnect co 5 sekund jeśli rozłączony
-        this.reconnectInterval = setInterval(() => {
-            if (this.autoReconnect && (!this.ws || this.ws.readyState !== WebSocket.OPEN)) {
-                this.connect();
-            }
-        }, 5000);
+        this.checkConnection();
+        this.startAutoRefresh();
     }
     
-    connect() {
-        if (this.ws && this.ws.readyState === WebSocket.CONNECTING) {
+    setupEventListeners() {
+        this.elements.startBtn.addEventListener('click', () => this.sendCommand('start'));
+        this.elements.stopBtn.addEventListener('click', () => this.sendCommand('stop'));
+        this.elements.restartBtn.addEventListener('click', () => this.sendCommand('restart'));
+        this.elements.sendBtn.addEventListener('click', () => this.sendCustomCommand());
+        this.elements.clearBtn.addEventListener('click', () => this.clearConsole());
+        this.elements.refreshBtn.addEventListener('click', () => this.checkStatus());
+        this.elements.commandInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.sendCustomCommand();
+        });
+    }
+    
+    async checkConnection() {
+        try {
+            const response = await fetch(this.apiUrl, {
+                method: 'GET',
+                mode: 'cors',
+                headers: { 'Accept': 'text/html' }
+            });
+            
+            if (response.ok) {
+                this.updateConnectionStatus('Połączono', '#2ecc71');
+                this.logToConsole('Połączono z serwerem kontrolera', 'info');
+                this.checkStatus();
+            } else {
+                throw new Error(`HTTP ${response.status}`);
+            }
+        } catch (error) {
+            this.updateConnectionStatus('Brak połączenia', '#e74c3c');
+            this.logToConsole(`Błąd połączenia: ${error.message}`, 'error');
+        }
+    }
+    
+    async checkStatus() {
+        try {
+            const response = await fetch(`${this.apiUrl}/api/status`, {
+                method: 'GET',
+                mode: 'cors'
+            });
+            
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            
+            const data = await response.json();
+            this.updateStatus(data);
+            this.updateConnectionStatus('Połączono', '#2ecc71');
+            
+        } catch (error) {
+            this.updateConnectionStatus('Błąd', '#e74c3c');
+            this.logToConsole(`Błąd pobierania statusu: ${error.message}`, 'error');
+        }
+    }
+    
+    async sendCommand(command) {
+        if (!this.apiUrl) {
+            this.logToConsole('Brak adresu API!', 'error');
             return;
         }
         
-        this.updateConnectionStatus('Łączenie...', '#f39c12');
-        this.logToConsole('Łączenie z serwerem WebSocket...', 'system');
+        // Wizualne potwierdzenie
+        const button = this.elements[`${command}Btn`];
+        const originalText = button.innerHTML;
+        button.innerHTML = '⏳ Wysyłanie...';
+        button.disabled = true;
         
         try {
-            this.ws = new WebSocket(this.wsUrl);
+            const response = await fetch(`${this.apiUrl}/api/command`, {
+                method: 'POST',
+                mode: 'cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ command: command })
+            });
             
-            this.ws.onopen = () => {
-                this.updateConnectionStatus('Połączono', '#2ecc71');
-                this.logToConsole('Połączenie z serwerem ustanowione!', 'system');
-                this.updateStatus({ status: 'connecting' });
-            };
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
             
-            this.ws.onmessage = (event) => {
-                try {
-                    const data = JSON.parse(event.data);
-                    
-                    if (data.type === 'status') {
-                        this.updateStatus(data.data);
-                    } else if (data.type === 'log') {
-                        this.logToConsole(data.message, 'info');
-                    }
-                } catch (e) {
-                    console.error('Błąd parsowania wiadomości:', e);
-                }
-            };
+            const data = await response.json();
+            this.logToConsole(`[Panel] ${data.message}`, 'info');
             
-            this.ws.onclose = () => {
-                this.updateConnectionStatus('Rozłączono', '#e74c3c');
-                this.logToConsole('Połączenie z serwerem zostało zamknięte', 'system');
-                this.updateStatus({ status: 'disconnected' });
-                
-                if (this.autoReconnect) {
-                    setTimeout(() => this.connect(), 3000);
-                }
-            };
-            
-            this.ws.onerror = (error) => {
-                this.updateConnectionStatus('Błąd połączenia', '#e74c3c');
-                this.logToConsole(`Błąd połączenia: ${error.message || 'Nieznany błąd'}`, 'error');
-            };
+            // Odśwież status po 2 sekundach
+            setTimeout(() => this.checkStatus(), 2000);
             
         } catch (error) {
-            this.logToConsole(`Nie można utworzyć połączenia: ${error.message}`, 'error');
+            this.logToConsole(`Błąd wysyłania komendy: ${error.message}`, 'error');
+        } finally {
+            // Przywróć przycisk
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }, 1000);
         }
     }
     
-    sendCommand(command) {
-        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-            this.logToConsole('Brak połączenia z serwerem!', 'error');
-            return false;
+    async sendCustomCommand() {
+        const command = this.elements.commandInput.value.trim();
+        if (!command) return;
+        
+        this.logToConsole(`[Użytkownik] > ${command}`, 'info');
+        
+        try {
+            const response = await fetch(`${this.apiUrl}/api/command`, {
+                method: 'POST',
+                mode: 'cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ command: command })
+            });
+            
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            
+            const data = await response.json();
+            this.logToConsole(`[Odpowiedź] ${data.message}`, 'info');
+            
+            // Wyczyść pole i odśwież logi
+            this.elements.commandInput.value = '';
+            setTimeout(() => this.checkStatus(), 1000);
+            
+        } catch (error) {
+            this.logToConsole(`Błąd wysyłania: ${error.message}`, 'error');
         }
-        
-        const message = {
-            type: 'command',
-            command: command
-        };
-        
-        this.ws.send(JSON.stringify(message));
-        this.logToConsole(`Wysłano komendę: ${command}`, 'system');
-        return true;
+    }
+    
+    async fetchLogs() {
+        try {
+            const response = await fetch(`${this.apiUrl}/api/logs?count=30`, {
+                method: 'GET',
+                mode: 'cors'
+            });
+            
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            
+            const data = await response.json();
+            this.displayLogs(data.logs);
+            
+        } catch (error) {
+            this.logToConsole(`Błąd pobierania logów: ${error.message}`, 'error');
+        }
     }
     
     updateStatus(data) {
         const status = data.status || 'unknown';
         
-        // Aktualizacja wskaźnika statusu
-        this.elements.statusIndicator.className = 'status-indicator ' + status;
+        // Aktualizacja panelu statusu
+        this.elements.statusPanel.className = `status ${status}`;
         
-        // Aktualizacja tekstu statusu
         const statusMessages = {
             'running': '🟢 Serwer działa',
             'stopped': '🔴 Serwer zatrzymany',
             'starting': '🟡 Serwer uruchamia się...',
-            'stopping': '🟡 Serwer zatrzymuje się...',
-            'disconnected': '⚫ Brak połączenia'
+            'stopping': '🟡 Serwer zatrzymuje się...'
         };
         
-        this.elements.statusText.textContent = statusMessages[status] || 'Status nieznany';
+        this.elements.statusText.textContent = `Status: ${statusMessages[status] || 'Nieznany'}`;
         
-        // Aktualizacja szczegółów
+        // Szczegóły
         if (status === 'running') {
-            this.elements.statusDetails.textContent = 'Serwer Minecraft jest aktywny';
-        } else if (status === 'stopped') {
-            this.elements.statusDetails.textContent = 'Serwer jest wyłączony';
+            this.elements.statusDetails.textContent = `Gracze: ${data.players?.length || 0}`;
+        } else {
+            this.elements.statusDetails.textContent = 'Serwer gotowy do uruchomienia';
         }
         
-        // Wyświetl logi jeśli są
+        // Wyświetl logi
         if (data.logs && data.logs.length > 0) {
-            data.logs.forEach(log => {
-                if (!this.elements.consoleOutput.textContent.includes(log)) {
-                    this.logToConsole(log, 'info');
-                }
-            });
+            this.displayLogs(data.logs);
         }
+    }
+    
+    displayLogs(logs) {
+        // Zachowaj istniejące logi, dodaj tylko nowe
+        const currentLogs = this.elements.consoleOutput.innerHTML;
+        const newLogs = logs.map(log => {
+            const type = log.includes('Błąd') || log.includes('ERROR') ? 'error' : 'info';
+            return `<div class="log-line log-${type}">${this.escapeHtml(log)}</div>`;
+        }).join('');
+        
+        this.elements.consoleOutput.innerHTML = newLogs;
+        
+        // Auto-scroll
+        this.elements.consoleOutput.scrollTop = this.elements.consoleOutput.scrollHeight;
     }
     
     logToConsole(message, type = 'info') {
@@ -146,17 +219,18 @@ class MinecraftController {
         line.textContent = message;
         
         this.elements.consoleOutput.appendChild(line);
-        
-        // Auto-scroll do dołu
         this.elements.consoleOutput.scrollTop = this.elements.consoleOutput.scrollHeight;
         
-        // Ogranicz do 200 linii
+        // Ogranicz do 100 linii
         const lines = this.elements.consoleOutput.children;
-        if (lines.length > 200) {
-            for (let i = 0; i < lines.length - 200; i++) {
-                this.elements.consoleOutput.removeChild(lines[i]);
-            }
+        if (lines.length > 100) {
+            this.elements.consoleOutput.removeChild(lines[0]);
         }
+    }
+    
+    clearConsole() {
+        this.elements.consoleOutput.innerHTML = '';
+        this.logToConsole('Konsola wyczyszczona', 'info');
     }
     
     updateConnectionStatus(text, color) {
@@ -164,54 +238,20 @@ class MinecraftController {
         this.elements.connectionStatus.style.color = color;
     }
     
-    setupEventListeners() {
-        // Przyciski kontroli
-        this.elements.startBtn.addEventListener('click', () => {
-            if (this.sendCommand('start')) {
-                this.elements.startBtn.disabled = true;
-                setTimeout(() => this.elements.startBtn.disabled = false, 3000);
+    startAutoRefresh() {
+        if (this.refreshInterval) clearInterval(this.refreshInterval);
+        
+        this.refreshInterval = setInterval(() => {
+            if (this.autoRefresh) {
+                this.checkStatus();
             }
-        });
-        
-        this.elements.stopBtn.addEventListener('click', () => {
-            if (this.sendCommand('stop')) {
-                this.elements.stopBtn.disabled = true;
-                setTimeout(() => this.elements.stopBtn.disabled = false, 3000);
-            }
-        });
-        
-        this.elements.restartBtn.addEventListener('click', () => {
-            if (this.sendCommand('restart')) {
-                this.elements.restartBtn.disabled = true;
-                setTimeout(() => this.elements.restartBtn.disabled = false, 5000);
-            }
-        });
-        
-        // Wysyłanie komend z konsoli
-        this.elements.sendBtn.addEventListener('click', () => {
-            const cmd = this.elements.commandInput.value.trim();
-            if (cmd) {
-                this.sendCommand(cmd);
-                this.elements.commandInput.value = '';
-            }
-        });
-        
-        this.elements.commandInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.elements.sendBtn.click();
-            }
-        });
-        
-        // Czyszczenie konsoli
-        this.elements.clearBtn.addEventListener('click', () => {
-            this.elements.consoleOutput.innerHTML = '';
-            this.logToConsole('Konsola wyczyszczona', 'system');
-        });
-        
-        // Ręczne łączenie
-        this.elements.connectBtn.addEventListener('click', () => {
-            this.connect();
-        });
+        }, 5000); // Odświeżaj co 5 sekund
+    }
+    
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 }
 
