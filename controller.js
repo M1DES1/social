@@ -1,7 +1,7 @@
 class MinecraftController {
     constructor() {
-        // 🔧 TU WPISZ SWÓJ ADRES Z CODESPACES
-        this.apiUrl = "https://turbo-fortnight-wr757r5wr7wrfgw75-5000.app.github.dev/";
+        // 🔧 UŻYJ SWOJEGO URL Z PORTEM 5001
+        this.apiUrl = "https://turbo-fortnight-wr757r5wr7wrfgw75-5001.app.github.dev/";
         
         this.autoRefresh = true;
         this.refreshInterval = null;
@@ -40,13 +40,14 @@ class MinecraftController {
         this.checkConnection();
         this.startAutoRefresh();
         
-        // Ukryj loading spinner po 2 sekundach
         setTimeout(() => {
             const loading = document.querySelector('.loading');
             if (loading && loading.parentNode === this.elements.consoleOutput) {
                 loading.style.display = 'none';
             }
-        }, 2000);
+        }, 1000);
+        
+        this.logToConsole(`🔗 Łączenie z: ${this.apiUrl}`, 'system');
     }
     
     setupEventListeners() {
@@ -75,28 +76,33 @@ class MinecraftController {
     async checkConnection() {
         try {
             this.updateConnectionStatus('⌛ Testowanie połączenia...', '#f39c12');
+            this.logToConsole('🔍 Sprawdzanie połączenia...', 'system');
             
-            const response = await fetch(`${this.apiUrl}/api/status`, {
-                method: 'GET',
-                mode: 'cors',
-                cache: 'no-cache'
-            });
+            const response = await fetch(`${this.apiUrl}/api/status`);
             
             if (response.ok) {
                 const data = await response.json();
                 this.isConnected = true;
                 this.updateConnectionStatus('✅ Połączono', '#2ecc71');
-                this.logToConsole('✓ Połączono z serwerem kontrolera Minecraft', 'system');
+                this.logToConsole('✓ Połączono z backendem!', 'system');
                 this.updateStatus(data);
+                
+                this.lastUpdate = new Date();
+                this.elements.lastCheck.textContent = this.lastUpdate.toLocaleTimeString('pl-PL');
+                
             } else {
                 throw new Error(`HTTP ${response.status}`);
             }
+            
         } catch (error) {
             console.error('Connection error:', error);
             this.isConnected = false;
             this.updateConnectionStatus('❌ Brak połączenia', '#e74c3c');
-            this.logToConsole(`✗ Błąd połączenia: ${error.message}`, 'error');
+            this.logToConsole(`✗ Błąd: ${error.message}`, 'error');
             this.updateStatus({ status: 'disconnected' });
+            
+            // Spróbuj ponownie za 3 sekundy
+            setTimeout(() => this.checkConnection(), 3000);
         }
     }
     
@@ -107,11 +113,7 @@ class MinecraftController {
         }
         
         try {
-            const response = await fetch(`${this.apiUrl}/api/status`, {
-                method: 'GET',
-                mode: 'cors',
-                cache: 'no-cache'
-            });
+            const response = await fetch(`${this.apiUrl}/api/status`);
             
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             
@@ -148,10 +150,8 @@ class MinecraftController {
         try {
             const response = await fetch(`${this.apiUrl}/api/command`, {
                 method: 'POST',
-                mode: 'cors',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ command: command })
             });
@@ -159,7 +159,7 @@ class MinecraftController {
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             
             const data = await response.json();
-            this.logToConsole(`✓ ${data.message}`, 'info');
+            this.logToConsole(`✅ ${data.message}`, 'info');
             
             // Odśwież status po 2 sekundach
             setTimeout(() => {
@@ -167,7 +167,7 @@ class MinecraftController {
             }, 2000);
             
         } catch (error) {
-            this.logToConsole(`✗ Błąd: ${error.message}`, 'error');
+            this.logToConsole(`❌ Błąd: ${error.message}`, 'error');
             this.updateConnectionStatus('⚠️ Błąd wysyłania', '#e74c3c');
         } finally {
             // Przywróć przycisk po 1.5 sekundy
@@ -192,7 +192,6 @@ class MinecraftController {
         try {
             const response = await fetch(`${this.apiUrl}/api/command`, {
                 method: 'POST',
-                mode: 'cors',
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -209,7 +208,7 @@ class MinecraftController {
             setTimeout(() => this.checkStatus(), 1000);
             
         } catch (error) {
-            this.logToConsole(`✗ Błąd wysyłania: ${error.message}`, 'error');
+            this.logToConsole(`❌ Błąd wysyłania: ${error.message}`, 'error');
         }
     }
     
@@ -217,10 +216,7 @@ class MinecraftController {
         if (!this.isConnected) return;
         
         try {
-            const response = await fetch(`${this.apiUrl}/api/logs?count=30`, {
-                method: 'GET',
-                mode: 'cors'
-            });
+            const response = await fetch(`${this.apiUrl}/api/logs?count=30`);
             
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             
@@ -396,7 +392,7 @@ class MinecraftController {
 document.addEventListener('DOMContentLoaded', () => {
     window.mcController = new MinecraftController();
     
-    // Pokazuj informację o naciśnięciu klawisza
+    // Informacje debug
     console.log('🎮 Minecraft Controller loaded!');
     console.log('Backend URL:', window.mcController.apiUrl);
 });
