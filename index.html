@@ -3,92 +3,386 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kontroler Serwera Minecraft</title>
+    <title>🎮 Kontroler Serwera Minecraft</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #1a1a2e; color: #e0e0ff; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #4a9eff; }
-        h1 { color: #4a9eff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        .control-panel { background: rgba(40, 40, 70, 0.8); padding: 20px; border-radius: 10px; margin-bottom: 20px; }
-        .status { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
-        .status-indicator { width: 20px; height: 20px; border-radius: 50%; background: #666; }
-        .status.running .status-indicator { background: #2ecc71; animation: pulse 2s infinite; }
-        .status.stopped .status-indicator { background: #e74c3c; }
-        .status.starting .status-indicator { background: #f39c12; animation: pulse 1s infinite; }
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
         
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(30, 30, 46, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
         
-        .buttons { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
-        .btn { padding: 15px 25px; border: none; border-radius: 8px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: all 0.3s; flex: 1; min-width: 150px; }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .btn-start { background: #27ae60; color: white; }
-        .btn-stop { background: #c0392b; color: white; }
-        .btn-restart { background: #d35400; color: white; }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #4a9eff;
+        }
         
-        .console { background: #0f0f1f; border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
-        .console-header { background: #2c3e50; padding: 15px 20px; }
-        .console-output { height: 400px; overflow-y: auto; padding: 20px; font-family: monospace; font-size: 14px; background: #000; }
-        .log-line { margin-bottom: 5px; white-space: pre-wrap; }
+        h1 {
+            color: #4a9eff;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #a0a0ff;
+            font-size: 1.2em;
+        }
+        
+        .status-panel {
+            background: rgba(40, 40, 60, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border: 1px solid #444;
+        }
+        
+        .status-indicator {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #666;
+        }
+        
+        .status-indicator.running {
+            background: #2ecc71;
+            box-shadow: 0 0 15px #2ecc71;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-indicator.stopped {
+            background: #e74c3c;
+            box-shadow: 0 0 15px #e74c3c;
+        }
+        
+        .status-indicator.starting {
+            background: #f39c12;
+            box-shadow: 0 0 15px #f39c12;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        .status-text {
+            flex-grow: 1;
+        }
+        
+        .status-text h3 {
+            color: #4a9eff;
+            margin-bottom: 5px;
+            font-size: 1.4em;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 18px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-start {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+        }
+        
+        .btn-stop {
+            background: linear-gradient(135deg, #c0392b, #e74c3c);
+            color: white;
+        }
+        
+        .btn-restart {
+            background: linear-gradient(135deg, #d35400, #f39c12);
+            color: white;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .console-container {
+            background: #0f0f1f;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            border: 1px solid #333;
+        }
+        
+        .console-header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            padding: 18px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .console-header h2 {
+            color: #4a9eff;
+            font-size: 1.5em;
+        }
+        
+        .console-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .btn-small {
+            padding: 10px 18px;
+            font-size: 0.95em;
+            border-radius: 6px;
+            background: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .console-output {
+            height: 450px;
+            overflow-y: auto;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            background: #000;
+        }
+        
+        .log-line {
+            margin-bottom: 6px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
         .log-info { color: #2ecc71; }
         .log-error { color: #e74c3c; }
+        .log-system { color: #3498db; }
+        .log-warning { color: #f39c12; }
         
-        .command-input { display: flex; padding: 15px; background: #2c3e50; border-top: 1px solid #333; }
-        #commandInput { flex: 1; padding: 12px; background: #34495e; border: none; border-radius: 6px; color: white; }
+        .command-input {
+            display: flex;
+            padding: 18px;
+            background: #2c3e50;
+            border-top: 1px solid #444;
+            gap: 12px;
+        }
         
-        .connection-info { background: rgba(40,40,70,0.8); padding: 15px; border-radius: 10px; font-size: 0.9em; }
+        #commandInput {
+            flex: 1;
+            padding: 14px 18px;
+            background: #34495e;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            color: white;
+            font-size: 1.05em;
+            font-family: 'Courier New', monospace;
+        }
+        
+        #commandInput:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
+        }
+        
+        .connection-info {
+            background: rgba(40, 40, 60, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
+            border: 1px solid #444;
+        }
+        
+        .connection-info h3 {
+            color: #4a9eff;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        code {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 4px 10px;
+            border-radius: 5px;
+            color: #2ecc71;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #a0a0ff;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(74, 158, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #4a9eff;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 15px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #444;
+            color: #888;
+            font-size: 0.9em;
+        }
+        
+        footer a {
+            color: #4a9eff;
+            text-decoration: none;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .container { padding: 20px; }
+            .buttons { flex-direction: column; }
+            .btn { width: 100%; min-width: auto; }
+            .console-header { flex-direction: column; align-items: flex-start; }
+            .console-controls { width: 100%; justify-content: flex-end; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>🎮 Kontroler Serwera Minecraft</h1>
-            <p>Połączony z serwerem w GitHub Codespaces</p>
+            <p class="subtitle">Zarządzaj serwerem Minecraft z poziomu przeglądarki</p>
         </header>
         
-        <div class="control-panel">
-            <div id="statusPanel" class="status stopped">
-                <div class="status-indicator"></div>
-                <div>
-                    <h3 id="statusText">Status: Łączenie...</h3>
-                    <p id="statusDetails">Inicjalizacja...</p>
-                </div>
+        <div class="status-panel" id="statusPanel">
+            <div class="status-indicator" id="statusIndicator"></div>
+            <div class="status-text">
+                <h3 id="statusTitle">Łączenie z serwerem...</h3>
+                <p id="statusDetails">Inicjalizacja połączenia z backendem</p>
             </div>
-            
-            <div class="buttons">
-                <button id="startBtn" class="btn btn-start">▶ START</button>
-                <button id="stopBtn" class="btn btn-stop">⏹ STOP</button>
-                <button id="restartBtn" class="btn btn-restart">🔄 RESTART</button>
+            <div id="playerCount" style="color: #f39c12; font-weight: bold; font-size: 1.1em;">
+                ⏳
             </div>
         </div>
         
-        <div class="console">
+        <div class="buttons">
+            <button id="startBtn" class="btn btn-start">
+                <span>▶</span> START SERWERA
+            </button>
+            <button id="stopBtn" class="btn btn-stop">
+                <span>⏹</span> STOP SERWERA
+            </button>
+            <button id="restartBtn" class="btn btn-restart">
+                <span>🔄</span> RESTART SERWERA
+            </button>
+        </div>
+        
+        <div class="console-container">
             <div class="console-header">
-                <h3>📟 Konsola serwera</h3>
-                <div>
-                    <button id="clearBtn" style="padding: 8px 15px; margin-right: 10px;">🧹 Wyczyść</button>
-                    <button id="refreshBtn" style="padding: 8px 15px;">🔄 Odśwież</button>
+                <h2>📟 Konsola serwera</h2>
+                <div class="console-controls">
+                    <button id="clearBtn" class="btn-small">
+                        <span>🧹</span> Wyczyść
+                    </button>
+                    <button id="refreshBtn" class="btn-small">
+                        <span>🔄</span> Odśwież
+                    </button>
+                    <label style="color: #a0a0ff; display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="autoRefresh" checked> Auto-odświeżanie
+                    </label>
                 </div>
             </div>
+            
             <div class="console-output" id="consoleOutput">
-                <div class="log-line log-info">=== Minecraft Server Console ===</div>
-                <div class="log-line log-info">Ładowanie...</div>
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Ładowanie konsoli...</p>
+                </div>
             </div>
+            
             <div class="command-input">
-                <input type="text" id="commandInput" placeholder="Wpisz komendę Minecraft...">
-                <button id="sendBtn" style="margin-left: 10px; padding: 12px 20px;">📤 Wyślij</button>
+                <input type="text" id="commandInput" 
+                       placeholder="Wpisz komendę Minecraft (np. 'say Witaj!')...">
+                <button id="sendBtn" class="btn btn-small" style="background: #9b59b6;">
+                    <span>📤</span> Wyślij
+                </button>
             </div>
         </div>
         
         <div class="connection-info">
-            <h4>🌐 Informacje o połączeniu</h4>
-            <p>Backend: <code id="backendUrl">https://xxxx-8080.app.github.dev</code></p>
-            <p>Status: <span id="connectionStatus" style="color: #f39c12;">Łączenie...</span></p>
-            <p style="margin-top: 10px; font-size: 0.85em; color: #888;">
-                Uwaga: Zastąp URL backendu w kodzie JavaScript swoim własnym URL z Codespaces
+            <h3>🌐 Informacje o połączeniu</h3>
+            <p>Backend: <code id="backendUrl">https://turbo-fortnight-wr757r5wr7wrfgw75-8080.app.github.dev</code></p>
+            <p>Status połączenia: <span id="connectionStatus" style="color: #f39c12;">Łączenie...</span></p>
+            <p>Ostatnie sprawdzenie: <span id="lastCheck">-</span></p>
+            <p style="margin-top: 15px; color: #a0a0ff; font-size: 0.9em;">
+                <strong>ℹ️ Informacja:</strong> Ten panel kontroluje serwer Minecraft działający w GitHub Codespaces
             </p>
         </div>
+        
+        <footer>
+            <p>Panel kontrolny Minecraft | Backend: GitHub Codespaces | Frontend: GitHub Pages</p>
+            <p>URL backendu: <code>https://turbo-fortnight-wr757r5wr7wrfgw75-8080.app.github.dev</code></p>
+        </footer>
     </div>
     
     <script src="controller.js"></script>
