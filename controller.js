@@ -1,7 +1,7 @@
 class MinecraftController {
     constructor() {
         // 🔧 TU WPISZ SWÓJ ADRES Z CODESPACES
-        this.apiUrl = "https://turbo-fortnight-wr757r5wr7wrfgw75-8080.app.github.dev";
+        this.apiUrl = "https://turbo-fortnight-wr757r5wr7wrfgw75-5000.app.github.dev/";
         
         this.autoRefresh = true;
         this.refreshInterval = null;
