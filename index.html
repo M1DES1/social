@@ -1,165 +1,87 @@
 <!DOCTYPE html>
-<html>
+<html lang="pl">
 <head>
-    <title>Panel Minecraft Server</title>
     <meta charset="UTF-8">
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; }
-        .header { text-align: center; margin-bottom: 40px; }
-        .header h1 { color: #00ff88; font-size: 2.5em; margin-bottom: 10px; }
-        .container { display: grid; grid-template-columns: 1fr 300px; gap: 30px; }
-        .console { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 20px; height: 500px; overflow-y: auto; font-family: 'Monaco', 'Courier New', monospace; font-size: 14px; line-height: 1.5; }
-        .console-line { margin-bottom: 5px; }
-        .timestamp { color: #8b949e; }
-        .info { color: #79c0ff; }
-        .success { color: #00ff88; }
-        .error { color: #ff7b72; }
-        .controls { display: flex; flex-direction: column; gap: 15px; }
-        .btn { padding: 18px; font-size: 18px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .btn-start { background: #00cc66; color: white; }
-        .btn-stop { background: #ff4444; color: white; }
-        .btn-restart { background: #ffaa00; color: white; }
-        .status-card { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; margin-top: 20px; }
-        .status-online { color: #00ff88; font-weight: bold; }
-        .status-offline { color: #ff4444; font-weight: bold; }
-        .playit-info { background: rgba(0, 100, 255, 0.1); padding: 15px; border-radius: 8px; margin-top: 20px; font-size: 14px; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontroler Serwera Minecraft</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="header">
-        <h1>⚙️ Panel Zarządzania Serwerem Minecraft</h1>
-        <p>Serwer uruchomiony w GitHub Codespaces | Paper 1.20.4</p>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-server"></i> Kontroler Serwera Minecraft</h1>
+            <p class="subtitle">Zarządzaj swoim serwerem z poziomu przeglądarki</p>
+        </header>
+        
+        <div class="control-panel">
+            <div class="status-box">
+                <h2><i class="fas fa-info-circle"></i> Status Serwera</h2>
+                <div id="serverStatus" class="status unknown">
+                    <span class="status-icon"><i class="fas fa-question-circle"></i></span>
+                    <span class="status-text">Sprawdzanie...</span>
+                </div>
+                <p class="server-info">Ostatnie sprawdzenie: <span id="lastCheck">-</span></p>
+            </div>
+            
+            <div class="buttons">
+                <h2><i class="fas fa-gamepad"></i> Kontrola</h2>
+                <div class="button-group">
+                    <button id="startBtn" class="btn btn-success">
+                        <i class="fas fa-play"></i> Start Serwera
+                    </button>
+                    <button id="stopBtn" class="btn btn-danger">
+                        <i class="fas fa-stop"></i> Stop Serwera
+                    </button>
+                    <button id="restartBtn" class="btn btn-warning">
+                        <i class="fas fa-redo"></i> Restart Serwera
+                    </button>
+                </div>
+                <p class="hint">Kliknij przycisk, aby wykonać akcję</p>
+            </div>
+        </div>
+        
+        <div class="console-container">
+            <div class="console-header">
+                <h2><i class="fas fa-terminal"></i> Konsola Serwera</h2>
+                <div class="console-controls">
+                    <button id="clearBtn" class="btn btn-small">
+                        <i class="fas fa-broom"></i> Wyczyść
+                    </button>
+                    <button id="refreshBtn" class="btn btn-small">
+                        <i class="fas fa-sync-alt"></i> Odśwież
+                    </button>
+                    <div class="auto-refresh">
+                        <input type="checkbox" id="autoRefresh" checked>
+                        <label for="autoRefresh">Auto-odświeżanie (5s)</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="console-output" id="consoleOutput">
+                <pre id="consoleLog">Ładowanie logów serwera...</pre>
+            </div>
+            
+            <div class="console-input">
+                <input type="text" id="commandInput" placeholder="Wpisz komendę Minecraft (np. 'say Witaj!')...">
+                <button id="sendCommandBtn" class="btn">
+                    <i class="fas fa-paper-plane"></i> Wyślij
+                </button>
+            </div>
+            <p class="hint">Możesz wysyłać bezpośrednie komendy do konsoli Minecraft</p>
+        </div>
+        
+        <div class="connection-info">
+            <h3><i class="fas fa-wifi"></i> Informacje o połączeniu</h3>
+            <p>Backend: <code id="backendUrl">Ładowanie...</code></p>
+            <p>Status połączenia: <span id="connectionStatus" class="status-text">Łączenie...</span></p>
+        </div>
+        
+        <footer>
+            <p>Panel kontrolny dla serwera Minecraft | Hostowany na <a href="https://render.com" target="_blank">Render.com</a></p>
+        </footer>
     </div>
     
-    <div class="container">
-        <div>
-            <div class="console" id="console">
-                <div class="console-line"><span class="timestamp">[00:00:00]</span> <span class="info">System:</span> Połączono z panelem serwera</div>
-                <div class="console-line"><span class="timestamp">[00:00:00]</span> <span class="info">Status:</span> <span id="statusText" class="status-offline">Łączenie z API...</span></div>
-            </div>
-            
-            <div class="status-card">
-                <h3>📊 Status serwera</h3>
-                <p>Wersja: <strong>Paper 1.20.4</strong></p>
-                <p>Port Minecraft: <code>5718</code></p> <!-- Zmieniono z 25565 na 5718 zgodnie z Twoją konfiguracją -->
-                <p>Status: <span id="statusIndicator" class="status-offline">OFFLINE</span></p>
-                <p>Gracze online: <span id="playerCount">0</span>/5</p>
-                <p>API Panelu: <span id="apiStatus" class="status-offline">nieaktywne</span></p>
-            </div>
-        </div>
-        
-        <div class="controls">
-            <button class="btn btn-start" onclick="sendCommand('start')">
-                <span>▶</span> WŁĄCZ SERWER
-            </button>
-            <button class="btn btn-restart" onclick="sendCommand('restart')">
-                <span>↻</span> RESTARTUJ
-            </button>
-            <button class="btn btn-stop" onclick="sendCommand('stop')">
-                <span>⏹</span> WYŁĄCZ SERWER
-            </button>
-            
-            <div class="playit-info">
-                <h4>🌐 Playit.gg Konfiguracja</h4>
-                <p>1. W terminalu Codespace uruchom:</p>
-                <code>./playit</code>
-                <p>2. Autoryzuj tunel</p>
-                <p>3. Użyj adresu z playit.gg</p>
-                <p id="playitUrl">Tunel nieaktywny</p>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // 🔧 KONFIGURACJA - TUTAJ WPISZ SWÓJ ADRES API
-        // Adres Twojej usługi webowej na Render.com
-     const API_BASE_URL = 'https://turbo-fortnight-wr757r5wr7wrfgw75-3000.app.github.dev'; // 👈 ZASTĄP TYM ADRESEM
-
-        let consoleElement = document.getElementById('console');
-        
-        function logToConsole(message, type = 'info') {
-            const timestamp = new Date().toLocaleTimeString('pl-PL', {hour12: false});
-            const line = document.createElement('div');
-            line.className = 'console-line';
-            line.innerHTML = `<span class="timestamp">[${timestamp}]</span> <span class="${type}">${message}</span>`;
-            consoleElement.appendChild(line);
-            consoleElement.scrollTop = consoleElement.scrollHeight;
-        }
-        
-        async function sendCommand(command) {
-            logToConsole(`Wysyłanie komendy: ${command}`, 'info');
-            
-            try {
-                const response = await fetch(`${API_BASE_URL}/${command}`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'}
-                });
-                
-                // Sprawdź, czy odpowiedź jest OK (status 200-299)
-                if (!response.ok) {
-                    throw new Error(`API zwróciło błąd HTTP: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                logToConsole(`Odpowiedź: ${data.message}`, data.success ? 'success' : 'error');
-                
-                if (command === 'start' || command === 'stop') {
-                    setTimeout(checkServerStatus, 2000);
-                }
-            } catch (error) {
-                logToConsole(`Błąd: ${error.message}`, 'error');
-                logToConsole('Sprawdź czy API jest uruchomione i adres jest poprawny', 'error');
-            }
-        }
-        
-        async function checkServerStatus() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/status`);
-                
-                if (!response.ok) {
-                    throw new Error(`Status API zwrócił błąd: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                const statusIndicator = document.getElementById('statusIndicator');
-                const statusText = document.getElementById('statusText');
-                const playerCount = document.getElementById('playerCount');
-                const apiStatus = document.getElementById('apiStatus');
-                
-                if (data.status === 'online') {
-                    statusIndicator.textContent = 'ONLINE';
-                    statusIndicator.className = 'status-online';
-                    statusText.textContent = 'Serwer działa poprawnie';
-                    statusText.className = 'status-online';
-                    apiStatus.textContent = 'aktywne';
-                    apiStatus.className = 'status-online';
-                } else {
-                    statusIndicator.textContent = 'OFFLINE';
-                    statusIndicator.className = 'status-offline';
-                    statusText.textContent = 'Serwer nieaktywny';
-                    statusText.className = 'status-offline';
-                    apiStatus.textContent = 'aktywne';
-                    apiStatus.className = 'status-online';
-                }
-                
-                playerCount.textContent = data.players || 0;
-            } catch (error) {
-                logToConsole('Nie można połączyć się z API panelu', 'error');
-                const apiStatusEl = document.getElementById('apiStatus');
-                apiStatusEl.textContent = 'błąd połączenia';
-                apiStatusEl.className = 'status-offline';
-            }
-        }
-        
-        // Inicjalizacja
-        logToConsole('Panel zarządzania załadowany', 'success');
-        logToConsole(`API: ${API_BASE_URL || 'NIE SKONFIGUROWANO'}`, 'info');
-        
-        // Sprawdzaj status co 10 sekund
-        setInterval(checkServerStatus, 10000);
-        checkServerStatus();
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
