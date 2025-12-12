@@ -4,84 +4,209 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kontroler Serwera Minecraft</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: #1a1a2e;
+            color: #e0e0ff;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(30, 30, 50, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #4a9eff;
+        }
+        
+        h1 {
+            color: #4a9eff;
+            margin-bottom: 10px;
+        }
+        
+        .status-panel {
+            background: rgba(40, 40, 70, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .status-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #666;
+        }
+        
+        .status-indicator.running { background: #2ecc71; animation: pulse 2s infinite; }
+        .status-indicator.stopped { background: #e74c3c; }
+        .status-indicator.starting { background: #f39c12; animation: pulse 1s infinite; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-start { background: #27ae60; color: white; }
+        .btn-stop { background: #c0392b; color: white; }
+        .btn-restart { background: #d35400; color: white; }
+        
+        .console-container {
+            background: #0f0f1f;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .console-header {
+            background: #2c3e50;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .console-output {
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            background: #000;
+        }
+        
+        .log-line {
+            margin-bottom: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .log-info { color: #2ecc71; }
+        .log-error { color: #e74c3c; }
+        .log-system { color: #3498db; }
+        
+        .command-input {
+            display: flex;
+            padding: 15px;
+            background: #2c3e50;
+            border-top: 1px solid #333;
+        }
+        
+        #commandInput {
+            flex: 1;
+            padding: 12px;
+            background: #34495e;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 1em;
+        }
+        
+        .connection-info {
+            background: rgba(40, 40, 70, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            margin-top: 20px;
+        }
+        
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #2ecc71;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-server"></i> Kontroler Serwera Minecraft</h1>
-            <p class="subtitle">Zarządzaj swoim serwerem z poziomu przeglądarki</p>
+            <h1>🎮 Kontroler Serwera Minecraft</h1>
+            <p>Połączony z serwerem w GitHub Codespaces</p>
         </header>
         
-        <div class="control-panel">
-            <div class="status-box">
-                <h2><i class="fas fa-info-circle"></i> Status Serwera</h2>
-                <div id="serverStatus" class="status unknown">
-                    <span class="status-icon"><i class="fas fa-question-circle"></i></span>
-                    <span class="status-text">Sprawdzanie...</span>
-                </div>
-                <p class="server-info">Ostatnie sprawdzenie: <span id="lastCheck">-</span></p>
+        <div class="status-panel">
+            <div id="statusIndicator" class="status-indicator"></div>
+            <div>
+                <h3 id="statusText">Status: Łączenie...</h3>
+                <p id="statusDetails">Inicjalizacja połączenia...</p>
             </div>
-            
-            <div class="buttons">
-                <h2><i class="fas fa-gamepad"></i> Kontrola</h2>
-                <div class="button-group">
-                    <button id="startBtn" class="btn btn-success">
-                        <i class="fas fa-play"></i> Start Serwera
-                    </button>
-                    <button id="stopBtn" class="btn btn-danger">
-                        <i class="fas fa-stop"></i> Stop Serwera
-                    </button>
-                    <button id="restartBtn" class="btn btn-warning">
-                        <i class="fas fa-redo"></i> Restart Serwera
-                    </button>
-                </div>
-                <p class="hint">Kliknij przycisk, aby wykonać akcję</p>
-            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="startBtn" class="btn btn-start">▶ START</button>
+            <button id="stopBtn" class="btn btn-stop">⏹ STOP</button>
+            <button id="restartBtn" class="btn btn-restart">🔄 RESTART</button>
         </div>
         
         <div class="console-container">
             <div class="console-header">
-                <h2><i class="fas fa-terminal"></i> Konsola Serwera</h2>
-                <div class="console-controls">
-                    <button id="clearBtn" class="btn btn-small">
-                        <i class="fas fa-broom"></i> Wyczyść
-                    </button>
-                    <button id="refreshBtn" class="btn btn-small">
-                        <i class="fas fa-sync-alt"></i> Odśwież
-                    </button>
-                    <div class="auto-refresh">
-                        <input type="checkbox" id="autoRefresh" checked>
-                        <label for="autoRefresh">Auto-odświeżanie (5s)</label>
-                    </div>
+                <h3>📟 Konsola serwera</h3>
+                <div>
+                    <button id="clearBtn" style="padding: 8px 15px; margin-right: 10px;">🧹 Wyczyść</button>
+                    <button id="connectBtn" style="padding: 8px 15px;">🔗 Połącz</button>
                 </div>
             </div>
-            
             <div class="console-output" id="consoleOutput">
-                <pre id="consoleLog">Ładowanie logów serwera...</pre>
+                <div class="log-line log-system">=== Minecraft Server Console ===</div>
+                <div class="log-line log-system">Oczekiwanie na połączenie...</div>
             </div>
-            
-            <div class="console-input">
-                <input type="text" id="commandInput" placeholder="Wpisz komendę Minecraft (np. 'say Witaj!')...">
-                <button id="sendCommandBtn" class="btn">
-                    <i class="fas fa-paper-plane"></i> Wyślij
-                </button>
+            <div class="command-input">
+                <input type="text" id="commandInput" placeholder="Wpisz komendę Minecraft...">
+                <button id="sendBtn" style="margin-left: 10px; padding: 12px 20px;">📤 Wyślij</button>
             </div>
-            <p class="hint">Możesz wysyłać bezpośrednie komendy do konsoli Minecraft</p>
         </div>
         
         <div class="connection-info">
-            <h3><i class="fas fa-wifi"></i> Informacje o połączeniu</h3>
-            <p>Backend: <code id="backendUrl">Ładowanie...</code></p>
-            <p>Status połączenia: <span id="connectionStatus" class="status-text">Łączenie...</span></p>
+            <h4>🌐 Informacje o połączeniu</h4>
+            <p>Połączony z: <code id="wsUrl">codespaces...</code></p>
+            <p>Status: <span id="connectionStatus" style="color: #f39c12;">Łączenie...</span></p>
         </div>
-        
-        <footer>
-            <p>Panel kontrolny dla serwera Minecraft | Hostowany na <a href="https://render.com" target="_blank">Render.com</a></p>
-        </footer>
     </div>
     
-    <script src="script.js"></script>
+    <script src="controller.js"></script>
 </body>
 </html>
