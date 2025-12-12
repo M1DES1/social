@@ -1,0 +1,289 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #e0e0e0;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: rgba(30, 30, 46, 0.9);
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #3498db;
+}
+
+header h1 {
+    color: #3498db;
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+header .subtitle {
+    color: #95a5a6;
+    font-size: 1.1rem;
+}
+
+.control-panel {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+@media (max-width: 768px) {
+    .control-panel {
+        grid-template-columns: 1fr;
+    }
+}
+
+.status-box, .buttons {
+    background-color: rgba(40, 40, 60, 0.8);
+    padding: 25px;
+    border-radius: 10px;
+    border: 1px solid #444;
+}
+
+.status-box h2, .buttons h2 {
+    color: #3498db;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+#serverStatus {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.status.działa {
+    background-color: rgba(46, 204, 113, 0.2);
+    border: 2px solid #2ecc71;
+    color: #2ecc71;
+}
+
+.status.zatrzymany {
+    background-color: rgba(231, 76, 60, 0.2);
+    border: 2px solid #e74c3c;
+    color: #e74c3c;
+}
+
+.status.zatrzymywanie {
+    background-color: rgba(243, 156, 18, 0.2);
+    border: 2px solid #f39c12;
+    color: #f39c12;
+}
+
+.status.unknown {
+    background-color: rgba(149, 165, 166, 0.2);
+    border: 2px solid #95a5a6;
+    color: #95a5a6;
+}
+
+.status-icon {
+    margin-right: 10px;
+    font-size: 1.5rem;
+}
+
+.server-info {
+    color: #95a5a6;
+    font-size: 0.9rem;
+}
+
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.btn {
+    padding: 15px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    flex-grow: 1;
+    min-width: 160px;
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn i {
+    margin-right: 8px;
+}
+
+.btn-success {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-warning {
+    background-color: #f39c12;
+    color: white;
+}
+
+.btn-small {
+    padding: 8px 15px;
+    font-size: 0.9rem;
+    min-width: auto;
+}
+
+.hint {
+    color: #7f8c8d;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+.console-container {
+    background-color: rgba(20, 20, 30, 0.95);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 30px;
+    border: 1px solid #444;
+}
+
+.console-header {
+    background-color: #2c3e50;
+    padding: 15px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.console-header h2 {
+    color: #3498db;
+}
+
+.console-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.auto-refresh {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.console-output {
+    padding: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+    background-color: #1a1a2e;
+}
+
+#consoleLog {
+    color: #00ff9d;
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.console-input {
+    display: flex;
+    padding: 15px;
+    background-color: #2c3e50;
+    border-top: 1px solid #444;
+}
+
+#commandInput {
+    flex-grow: 1;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 6px;
+    background-color: #34495e;
+    color: white;
+    font-size: 1rem;
+}
+
+#commandInput:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #3498db;
+}
+
+#sendCommandBtn {
+    margin-left: 10px;
+    background-color: #3498db;
+    color: white;
+}
+
+.connection-info {
+    background-color: rgba(40, 40, 60, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.connection-info h3 {
+    color: #3498db;
+    margin-bottom: 15px;
+}
+
+.connection-info p {
+    margin-bottom: 10px;
+}
+
+.connection-info code {
+    background-color: #2c3e50;
+    padding: 3px 8px;
+    border-radius: 4px;
+    color: #2ecc71;
+}
+
+footer {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid #444;
+    color: #95a5a6;
+    font-size: 0.9rem;
+}
+
+footer a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
