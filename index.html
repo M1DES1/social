@@ -2,1125 +2,1208 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Minecraft Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Minecraft Server Control Panel</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* === RESET I PODSTAWY === */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
-        :root {
-            --primary: #4a9eff;
-            --success: #2ecc71;
-            --danger: #e74c3c;
-            --warning: #f39c12;
-            --dark: #1a1a2e;
-            --darker: #0f0f1f;
-            --light: #e0e0ff;
-            --gray: #a0a0ff;
-            --card-bg: rgba(30, 30, 50, 0.95);
-            --border: rgba(100, 100, 255, 0.2);
-        }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--dark);
-            color: var(--light);
-            line-height: 1.6;
-            overflow-x: hidden;
-            padding: env(safe-area-inset-top) env(safe-area-inset-right) 
-                     env(safe-area-inset-bottom) env(safe-area-inset-left);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
             min-height: 100vh;
+            padding: 20px;
         }
-        
-        /* === KONTENER GŁÓWNY === */
-        .app-container {
-            max-width: 100%;
+
+        .container {
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 15px;
+            background-color: rgba(30, 30, 46, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
-        
-        @media (min-width: 768px) {
-            .app-container {
-                max-width: 1200px;
-                padding: 20px;
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        header h1 {
+            color: #3498db;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        header .subtitle {
+            color: #95a5a6;
+            font-size: 1.1rem;
+        }
+
+        .control-panel {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .control-panel {
+                grid-template-columns: 1fr;
             }
         }
-        
-        /* === NAGŁÓWEK === */
-        .app-header {
-            text-align: center;
-            padding: 20px 0;
+
+        .status-box, .buttons {
+            background-color: rgba(40, 40, 60, 0.8);
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #444;
+        }
+
+        .status-box h2, .buttons h2 {
+            color: #3498db;
             margin-bottom: 20px;
-            border-bottom: 2px solid var(--primary);
-            position: relative;
+            font-size: 1.5rem;
         }
-        
-        .app-title {
-            font-size: clamp(1.8rem, 5vw, 2.5rem);
-            color: var(--primary);
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(74, 158, 255, 0.5);
-        }
-        
-        .app-subtitle {
-            color: var(--gray);
-            font-size: clamp(0.9rem, 3vw, 1.1rem);
-        }
-        
-        /* === STATUS BAR === */
-        .status-bar {
-            background: linear-gradient(135deg, #2c3e50, #34495e);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
+
+        #serverStatus {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
-            gap: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--border);
-            flex-wrap: wrap;
-        }
-        
-        .status-indicator {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #666;
-            flex-shrink: 0;
-        }
-        
-        .status-indicator.running { background: var(--success); animation: pulse 2s infinite; }
-        .status-indicator.stopped { background: var(--danger); }
-        .status-indicator.starting { background: var(--warning); animation: pulse 1s infinite; }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .status-info {
-            flex: 1;
-            min-width: 200px;
-        }
-        
-        .status-title {
-            color: var(--primary);
             font-size: 1.2rem;
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
-        
-        .players-badge {
-            background: rgba(243, 156, 18, 0.2);
-            padding: 8px 15px;
-            border-radius: 10px;
-            border: 1px solid var(--warning);
-            text-align: center;
-            flex-shrink: 0;
-        }
-        
-        .players-count {
-            font-size: 1.5rem;
             font-weight: bold;
-            color: var(--warning);
-            display: block;
         }
-        
-        /* === PRZYCISKI AKCJI === */
-        .action-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
+
+        .status.działa {
+            background-color: rgba(46, 204, 113, 0.2);
+            border: 2px solid #2ecc71;
+            color: #2ecc71;
         }
-        
-        .action-btn {
-            padding: 18px 15px;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+
+        .status.zatrzymany {
+            background-color: rgba(231, 76, 60, 0.2);
+            border: 2px solid #e74c3c;
+            color: #e74c3c;
+        }
+
+        .status.uruchamianie {
+            background-color: rgba(243, 156, 18, 0.2);
+            border: 2px solid #f39c12;
+            color: #f39c12;
+        }
+
+        .status.unknown {
+            background-color: rgba(149, 165, 166, 0.2);
+            border: 2px solid #95a5a6;
+            color: #95a5a6;
+        }
+
+        .status-icon {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+
+        .server-info {
+            color: #95a5a6;
+            font-size: 0.9rem;
+        }
+
+        .server-info strong {
+            color: #3498db;
+        }
+
+        .button-group {
             display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            text-align: center;
-            min-height: 90px;
+            transition: all 0.3s ease;
+            flex-grow: 1;
+            min-width: 160px;
         }
-        
-        .action-btn:active {
-            transform: scale(0.98);
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
-        
-        .action-btn.start { background: linear-gradient(135deg, var(--success), #27ae60); color: white; }
-        .action-btn.stop { background: linear-gradient(135deg, var(--danger), #c0392b); color: white; }
-        .action-btn.restart { background: linear-gradient(135deg, var(--warning), #d35400); color: white; }
-        .action-btn.settings { background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; }
-        
-        .action-btn i {
-            font-size: 1.5rem;
+
+        .btn:active {
+            transform: translateY(0);
         }
-        
-        /* === PANEL ZAKŁADEK === */
-        .tabs-container {
-            background: var(--card-bg);
-            border-radius: 15px;
-            overflow: hidden;
-            margin-bottom: 25px;
-            border: 1px solid var(--border);
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
         }
-        
-        .tabs-header {
-            display: flex;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            background: rgba(40, 40, 70, 0.9);
-            border-bottom: 2px solid var(--primary);
-            scrollbar-width: none;
+
+        .btn i {
+            margin-right: 8px;
         }
-        
-        .tabs-header::-webkit-scrollbar {
-            display: none;
+
+        .btn-success {
+            background-color: #2ecc71;
+            color: white;
         }
-        
-        .tab-btn {
-            padding: 18px 20px;
-            border: none;
-            background: transparent;
-            color: var(--gray);
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
         }
-        
-        .tab-btn.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-            background: rgba(74, 158, 255, 0.1);
+
+        .btn-warning {
+            background-color: #f39c12;
+            color: white;
         }
-        
-        .tab-content {
-            padding: 0;
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
         }
-        
-        .tab-pane {
-            display: none;
-            padding: 20px;
-            animation: fadeIn 0.3s ease;
+
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            min-width: auto;
         }
-        
-        .tab-pane.active {
-            display: block;
+
+        .hint {
+            color: #7f8c8d;
+            font-style: italic;
+            font-size: 0.9rem;
         }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        /* === KONSOLA === */
-        .console-wrapper {
-            background: #000;
+
+        .console-container {
+            background-color: rgba(20, 20, 30, 0.95);
             border-radius: 10px;
             overflow: hidden;
-            height: 400px;
-            display: flex;
-            flex-direction: column;
-            border: 1px solid var(--border);
+            margin-bottom: 30px;
+            border: 1px solid #444;
         }
-        
+
         .console-header {
-            background: #2c3e50;
-            padding: 15px;
+            background-color: #2c3e50;
+            padding: 15px 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
         }
-        
-        .console-output {
-            flex: 1;
-            padding: 15px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            line-height: 1.4;
-            background: #000;
-            color: #00ff9d;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            -webkit-overflow-scrolling: touch;
+
+        .console-header h2 {
+            color: #3498db;
         }
-        
+
         .console-controls {
             display: flex;
-            gap: 10px;
             align-items: center;
+            gap: 15px;
         }
-        
-        .btn-small {
-            padding: 8px 15px;
-            font-size: 0.9rem;
-            border-radius: 8px;
-            background: #3498db;
-            color: white;
-            border: none;
-            cursor: pointer;
+
+        .auto-refresh {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
         }
-        
-        .command-input {
+
+        .console-output {
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            background-color: #1a1a2e;
+        }
+
+        #consoleLog {
+            color: #00ff9d;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            min-height: 200px;
+        }
+
+        .console-input {
             display: flex;
             padding: 15px;
-            background: #2c3e50;
-            border-top: 1px solid var(--border);
-            gap: 10px;
+            background-color: #2c3e50;
+            border-top: 1px solid #444;
         }
-        
+
         #commandInput {
-            flex: 1;
-            padding: 12px;
-            background: #34495e;
-            border: 2px solid transparent;
-            border-radius: 8px;
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 6px;
+            background-color: #34495e;
             color: white;
             font-size: 1rem;
-            font-family: 'Courier New', monospace;
         }
-        
+
         #commandInput:focus {
             outline: none;
-            border-color: var(--primary);
+            box-shadow: 0 0 0 2px #3498db;
         }
-        
-        /* === MANAGER WERSJI === */
-        .version-manager {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
+
+        #sendCommandBtn {
+            margin-left: 10px;
+            background-color: #3498db;
+            color: white;
         }
-        
-        @media (min-width: 768px) {
-            .version-manager {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-        
-        .card {
-            background: var(--card-bg);
+
+        .connection-info {
+            background-color: rgba(40, 40, 60, 0.8);
             padding: 20px;
-            border-radius: 15px;
-            border: 1px solid var(--border);
-        }
-        
-        .card h3 {
-            color: var(--primary);
-            margin-bottom: 15px;
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .engine-selector {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 10px;
+            border-radius: 10px;
             margin-bottom: 20px;
         }
-        
-        .engine-btn {
-            padding: 15px 10px;
-            border: 2px solid var(--border);
-            background: rgba(30, 30, 60, 0.8);
-            color: var(--gray);
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
+
+        .connection-info h3 {
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+
+        .connection-info p {
+            margin-bottom: 10px;
+        }
+
+        .connection-info code {
+            background-color: #2c3e50;
+            padding: 3px 8px;
+            border-radius: 4px;
+            color: #2ecc71;
+        }
+
+        footer {
             text-align: center;
-            font-weight: 600;
+            padding-top: 20px;
+            border-top: 1px solid #444;
+            color: #95a5a6;
+            font-size: 0.9rem;
         }
-        
-        .engine-btn.active {
-            border-color: var(--primary);
-            background: rgba(74, 158, 255, 0.2);
-            color: var(--primary);
+
+        footer a {
+            color: #3498db;
+            text-decoration: none;
         }
-        
-        .version-select {
-            width: 100%;
-            padding: 12px;
-            background: rgba(30, 30, 60, 0.8);
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            color: white;
-            font-size: 1rem;
-            margin-bottom: 15px;
-            cursor: pointer;
+
+        footer a:hover {
+            text-decoration: underline;
         }
-        
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background: rgba(30, 30, 60, 0.8);
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 15px 0;
-            border: 1px solid var(--border);
+
+        /* Modal EULA */
+        .eula-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--success), #27ae60);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-        
-        /* === MANAGER PLIKÓW === */
-        .file-manager {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
-        }
-        
-        @media (min-width: 992px) {
-            .file-manager {
-                grid-template-columns: 300px 1fr;
-            }
-        }
-        
-        .file-toolbar {
+
+        .eula-modal.active {
             display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
         }
-        
-        .file-list {
-            height: 300px;
-            overflow-y: auto;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            padding: 10px;
-            -webkit-overflow-scrolling: touch;
+
+        .eula-content {
+            background-color: #1a1a2e;
+            border-radius: 15px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            border: 3px solid #e74c3c;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
         }
-        
-        .file-item {
-            padding: 12px;
-            margin-bottom: 8px;
-            background: rgba(30, 30, 60, 0.8);
-            border-radius: 8px;
+
+        .eula-header {
+            background-color: #e74c3c;
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .eula-header h2 {
             display: flex;
             align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
+            justify-content: center;
+            gap: 15px;
         }
-        
-        .file-item:active {
-            background: rgba(74, 158, 255, 0.2);
-            transform: translateX(5px);
+
+        .eula-body {
+            padding: 30px;
+            overflow-y: auto;
+            max-height: 60vh;
         }
-        
-        .file-editor {
-            display: flex;
-            flex-direction: column;
-            height: 300px;
-        }
-        
-        .file-content {
-            flex: 1;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 15px;
-            color: var(--light);
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            resize: none;
-            white-space: pre;
-            overflow-x: auto;
-        }
-        
-        /* === USTAWIENIA SERWERA === */
-        .settings-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        
-        .setting-group {
-            background: var(--card-bg);
+
+        .eula-text {
+            background-color: rgba(0, 0, 0, 0.3);
             padding: 20px;
-            border-radius: 15px;
-            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            line-height: 1.6;
         }
-        
-        .setting-item {
+
+        .eula-text h3 {
+            color: #f39c12;
+            margin-bottom: 10px;
+        }
+
+        .eula-text ol {
+            margin-left: 20px;
             margin-bottom: 15px;
         }
-        
-        .setting-label {
-            display: block;
-            color: var(--gray);
+
+        .eula-text li {
             margin-bottom: 8px;
-            font-weight: 500;
         }
-        
-        .setting-input {
-            width: 100%;
-            padding: 12px;
-            background: rgba(30, 30, 60, 0.8);
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            color: white;
-            font-size: 1rem;
+
+        .eula-text strong {
+            color: #3498db;
         }
-        
-        .slider-container {
-            padding: 10px 0;
+
+        .eula-warning {
+            background-color: rgba(243, 156, 18, 0.1);
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
         }
-        
-        .slider {
-            width: 100%;
-            height: 8px;
-            -webkit-appearance: none;
-            background: rgba(30, 30, 60, 0.8);
-            border-radius: 4px;
-            outline: none;
+
+        .eula-footer {
+            padding: 20px 30px;
+            background-color: rgba(40, 40, 60, 0.8);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
         }
-        
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: var(--primary);
-            cursor: pointer;
-            border: 2px solid white;
+
+        .eula-buttons {
+            display: flex;
+            gap: 15px;
         }
-        
-        /* === NOTYFIKACJE === */
+
         .notification {
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 15px 20px;
-            border-radius: 10px;
+            padding: 15px 25px;
+            border-radius: 8px;
             color: white;
-            font-weight: 600;
-            z-index: 1000;
+            font-weight: bold;
+            z-index: 1001;
             animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            max-width: 90%;
-            word-break: break-word;
+            max-width: 400px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        
-        .notification.success { background: var(--success); }
-        .notification.error { background: var(--danger); }
-        .notification.warning { background: var(--warning); }
-        
-        /* === RESPONSYWNOŚĆ === */
-        @media (max-width: 480px) {
-            .action-grid {
-                grid-template-columns: 1fr;
+
+        .notification.success {
+            background-color: #2ecc71;
+        }
+
+        .notification.error {
+            background-color: #e74c3c;
+        }
+
+        .notification.warning {
+            background-color: #f39c12;
+        }
+
+        .notification.info {
+            background-color: #3498db;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
             }
-            
-            .status-bar {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .players-badge {
-                width: 100%;
-            }
-            
-            .tabs-header {
-                justify-content: space-around;
-            }
-            
-            .tab-btn {
-                padding: 15px;
-                font-size: 0.9rem;
-            }
-            
-            .file-manager {
-                height: auto;
+            to {
+                transform: translateX(0);
+                opacity: 1;
             }
         }
-        
-        /* === DARK/LIGHT MODE SUPPORT === */
-        @media (prefers-color-scheme: light) {
-            :root {
-                --dark: #f0f0f5;
-                --darker: #e0e0ea;
-                --light: #1a1a2e;
-                --gray: #4a4a6e;
-                --card-bg: rgba(255, 255, 255, 0.95);
-                --border: rgba(100, 100, 255, 0.1);
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
             }
-            
-            .console-wrapper {
-                background: #2c3e50;
+            to {
+                opacity: 0;
             }
         }
-        
-        /* === LOADING STATES === */
+
+        /* EULA Warning Box */
+        .eula-warning-box {
+            background-color: rgba(231, 76, 60, 0.1);
+            border: 2px solid #e74c3c;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .eula-warning-box h3 {
+            color: #e74c3c;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .eula-warning-box p {
+            margin-bottom: 15px;
+            color: #ffcccb;
+        }
+
+        /* Loading spinner */
         .loading {
             text-align: center;
             padding: 40px;
-            color: var(--gray);
+            color: #95a5a6;
         }
-        
+
         .spinner {
             display: inline-block;
             width: 40px;
             height: 40px;
-            border: 4px solid rgba(74, 158, 255, 0.3);
+            border: 4px solid rgba(52, 152, 219, 0.3);
             border-radius: 50%;
-            border-top-color: var(--primary);
-            animation: spin 1s ease-in-out infinite;
+            border-top-color: #3498db;
+            animation: spin 1s linear infinite;
             margin-bottom: 15px;
         }
-        
-        /* === FOOTER === */
-        .app-footer {
-            text-align: center;
-            padding: 20px 0;
-            margin-top: 30px;
-            border-top: 1px solid var(--border);
-            color: var(--gray);
-            font-size: 0.9rem;
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
-        
-        .connection-status {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-left: 10px;
+
+        /* Log colors */
+        .log-error {
+            color: #ff6b6b;
         }
-        
-        .status-connected { background: rgba(46, 204, 113, 0.2); color: var(--success); }
-        .status-disconnected { background: rgba(231, 76, 60, 0.2); color: var(--danger); }
-        
-        /* === IMPROVED SCROLLBARS === */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+
+        .log-success {
+            color: #2ecc71;
         }
-        
-        ::-webkit-scrollbar-track {
-            background: rgba(30, 30, 50, 0.3);
-            border-radius: 4px;
+
+        .log-info {
+            color: #3498db;
         }
-        
-        ::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 4px;
+
+        .log-warning {
+            color: #f39c12;
         }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: #2980b9;
-        }
-        
-        /* === TOUCH-FRIENDLY ELEMENTS === */
-        button, 
-        input[type="button"],
-        input[type="submit"],
-        .clickable {
-            min-height: 44px;
-            min-width: 44px;
-        }
-        
-        select,
-        input[type="text"],
-        input[type="number"],
-        textarea {
-            font-size: 16px; /* Zapobiega zoomowaniu iOS */
-        }
-        
-        /* === SAFE AREA SUPPORT === */
-        .safe-top {
-            padding-top: env(safe-area-inset-top);
-        }
-        
-        .safe-bottom {
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-        
-        /* === QUICK ACTIONS MENU === */
-        .quick-actions {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 100;
-        }
-        
-        .quick-menu-btn {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s;
-        }
-        
-        .quick-menu-btn:active {
-            transform: scale(0.95);
-        }
-        
-        .quick-menu {
-            position: absolute;
-            bottom: 70px;
-            right: 0;
-            background: var(--card-bg);
-            border-radius: 15px;
-            padding: 15px;
-            display: none;
-            flex-direction: column;
-            gap: 10px;
-            min-width: 200px;
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-        
-        .quick-menu.show {
-            display: flex;
+
+        .log-system {
+            color: #9b59b6;
         }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Nagłówek -->
-        <header class="app-header">
-            <h1 class="app-title">🎮 Minecraft Control</h1>
-            <p class="app-subtitle">Zarządzaj serwerem z każdego urządzenia</p>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-gamepad"></i> Minecraft Server Control Panel</h1>
+            <p class="subtitle">Zarządzaj serwerem Minecraft z poziomu przeglądarki</p>
         </header>
-        
-        <!-- Status Bar -->
-        <div class="status-bar">
-            <div class="status-indicator" id="statusIndicator"></div>
-            <div class="status-info">
-                <div class="status-title" id="statusTitle">Łączenie...</div>
-                <div class="status-desc" id="statusDetails">Inicjalizacja połączenia</div>
-                <small>Silnik: <span id="currentEngine">paper</span> | Wersja: <span id="currentVersion">1.20.4</span></small>
-            </div>
-            <div class="players-badge">
-                <span class="players-count" id="playerCount">0</span>
-                <div>Graczy</div>
-            </div>
-        </div>
-        
-        <!-- Szybkie przyciski akcji -->
-        <div class="action-grid">
-            <button class="action-btn start" id="startBtn">
-                <i class="fas fa-play"></i>
-                <span>START</span>
-            </button>
-            <button class="action-btn stop" id="stopBtn">
-                <i class="fas fa-stop"></i>
-                <span>STOP</span>
-            </button>
-            <button class="action-btn restart" id="restartBtn">
-                <i class="fas fa-redo"></i>
-                <span>RESTART</span>
-            </button>
-            <button class="action-btn settings" id="settingsBtn">
-                <i class="fas fa-cog"></i>
-                <span>USTAWIENIA</span>
+
+        <!-- EULA Warning Box - pokazuje się tylko gdy EULA nie jest zaakceptowana -->
+        <div class="eula-warning-box" id="eulaWarningBox" style="display: none;">
+            <h3><i class="fas fa-exclamation-triangle"></i> WYMAGANA AKCEPTACJA EULA</h3>
+            <p>Aby uruchomić serwer Minecraft, musisz zaakceptować Minecraft EULA (End User License Agreement).</p>
+            <button class="btn btn-primary" id="showEulaBtn">
+                <i class="fas fa-file-contract"></i> Zaakceptuj EULA
             </button>
         </div>
-        
-        <!-- Panel zakładek -->
-        <div class="tabs-container">
-            <div class="tabs-header">
-                <button class="tab-btn active" data-tab="console">
-                    <i class="fas fa-terminal"></i> Konsola
-                </button>
-                <button class="tab-btn" data-tab="version">
-                    <i class="fas fa-download"></i> Wersje
-                </button>
-                <button class="tab-btn" data-tab="files">
-                    <i class="fas fa-folder"></i> Pliki
-                </button>
-                <button class="tab-btn" data-tab="settings">
-                    <i class="fas fa-sliders-h"></i> Ustawienia
-                </button>
-                <button class="tab-btn" data-tab="plugins">
-                    <i class="fas fa-puzzle-piece"></i> Pluginy
-                </button>
+
+        <div class="control-panel">
+            <div class="status-box">
+                <h2><i class="fas fa-server"></i> Status Serwera</h2>
+                <div id="serverStatus" class="status zatrzymany">
+                    <span class="status-icon">⭕</span>
+                    <span id="statusText">Ładowanie...</span>
+                </div>
+                <div class="server-info">
+                    <p><strong>Silnik:</strong> <span id="engineInfo">Paper</span></p>
+                    <p><strong>Wersja:</strong> <span id="versionInfo">1.20.4</span></p>
+                    <p><strong>Graczy online:</strong> <span id="playerCount">0</span></p>
+                    <p><strong>EULA Status:</strong> <span id="eulaStatus">Sprawdzanie...</span></p>
+                    <p><strong>Ostatnia aktualizacja:</strong> <span id="lastUpdate">-</span></p>
+                </div>
             </div>
-            
-            <div class="tab-content">
-                <!-- Zakładka Konsola -->
-                <div class="tab-pane active" id="console-tab">
-                    <div class="console-wrapper">
-                        <div class="console-header">
-                            <h3 style="color: var(--primary); margin: 0;">
-                                <i class="fas fa-terminal"></i> Konsola serwera
-                            </h3>
-                            <div class="console-controls">
-                                <button class="btn-small" id="clearBtn">
-                                    <i class="fas fa-broom"></i>
-                                </button>
-                                <button class="btn-small" id="refreshBtn">
-                                    <i class="fas fa-sync-alt"></i>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="console-output" id="consoleOutput">
-                            <div class="loading">
-                                <div class="spinner"></div>
-                                <p>Ładowanie konsoli...</p>
-                            </div>
-                        </div>
-                        
-                        <div class="command-input">
-                            <input type="text" id="commandInput" 
-                                   placeholder="Wpisz komendę Minecraft...">
-                            <button class="btn-small" id="sendBtn" style="background: var(--primary);">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
-                        </div>
-                    </div>
+
+            <div class="buttons">
+                <h2><i class="fas fa-cogs"></i> Kontrola</h2>
+                <div class="button-group">
+                    <button class="btn btn-success" id="startBtn">
+                        <i class="fas fa-play"></i> Start Serwera
+                    </button>
+                    <button class="btn btn-danger" id="stopBtn" disabled>
+                        <i class="fas fa-stop"></i> Stop Serwera
+                    </button>
+                    <button class="btn btn-warning" id="restartBtn" disabled>
+                        <i class="fas fa-redo"></i> Restart Serwera
+                    </button>
                 </div>
-                
-                <!-- Zakładka Wersje -->
-                <div class="tab-pane" id="version-tab">
-                    <div class="version-manager">
-                        <div class="card">
-                            <h3><i class="fas fa-cogs"></i> Wybierz silnik</h3>
-                            <div class="engine-selector">
-                                <button class="engine-btn" data-engine="vanilla">
-                                    <i class="fas fa-cube"></i> Vanilla
-                                </button>
-                                <button class="engine-btn active" data-engine="paper">
-                                    <i class="fas fa-file-alt"></i> Paper
-                                </button>
-                                <button class="engine-btn" data-engine="forge">
-                                    <i class="fas fa-tools"></i> Forge
-                                </button>
-                            </div>
-                            <p style="color: var(--gray); font-size: 0.9rem; margin-top: 10px;">
-                                <strong>Paper</strong> jest zalecany - lepsza wydajność i wsparcie pluginów.
-                            </p>
-                        </div>
-                        
-                        <div class="card">
-                            <h3><i class="fas fa-code-branch"></i> Wybierz wersję</h3>
-                            <select class="version-select" id="versionSelect">
-                                <option value="">Ładowanie wersji...</option>
-                            </select>
-                            
-                            <div style="margin: 15px 0; padding: 10px; background: rgba(243, 156, 18, 0.1); 
-                                       border-radius: 8px; border-left: 4px solid var(--warning);">
-                                <strong>Wymagana Java:</strong> <span id="javaRequirement">Java 17+</span>
-                            </div>
-                            
-                            <button class="action-btn start" id="downloadBtn" style="width: 100%;">
-                                <i class="fas fa-download"></i> Pobierz i zainstaluj
-                            </button>
-                            
-                            <div class="progress-bar" id="downloadProgress" style="display: none; margin-top: 15px;">
-                                <div class="progress-fill" id="progressFill"></div>
-                            </div>
-                            <div id="progressText" style="text-align: center; color: var(--gray); font-size: 0.9rem;"></div>
-                        </div>
-                    </div>
+                <div class="button-group">
+                    <button class="btn btn-primary" id="eulaStatusBtn">
+                        <i class="fas fa-file-contract"></i> EULA Status
+                    </button>
+                    <button class="btn btn-primary" id="refreshStatusBtn">
+                        <i class="fas fa-sync-alt"></i> Odśwież Status
+                    </button>
                 </div>
-                
-                <!-- Zakładka Pliki -->
-                <div class="tab-pane" id="files-tab">
-                    <div class="file-manager">
-                        <div class="card">
-                            <h3><i class="fas fa-folder-open"></i> Eksplorator plików</h3>
-                            <div class="file-toolbar">
-                                <button class="btn-small" id="backBtn">
-                                    <i class="fas fa-arrow-left"></i>
-                                </button>
-                                <button class="btn-small" id="uploadBtn">
-                                    <i class="fas fa-upload"></i> Wgraj
-                                </button>
-                                <button class="btn-small" id="deleteBtn" style="background: var(--danger);">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                            <div style="padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; 
-                                      margin-bottom: 10px; font-family: monospace; font-size: 0.9rem;">
-                                Ścieżka: <span id="filePath">/</span>
-                            </div>
-                            <div class="file-list" id="fileList">
-                                <div class="loading">
-                                    <div class="spinner"></div>
-                                    <p>Ładowanie plików...</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="card">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                <h3 style="margin: 0;"><i class="fas fa-edit"></i> Edytor</h3>
-                                <button class="btn-small" id="saveFileBtn" style="display: none;">
-                                    <i class="fas fa-save"></i> Zapisz
-                                </button>
-                            </div>
-                            <textarea class="file-content" id="fileContent" 
-                                      placeholder="Wybierz plik z listy aby edytować..."></textarea>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Zakładka Ustawienia -->
-                <div class="tab-pane" id="settings-tab">
-                    <div class="settings-grid">
-                        <div class="setting-group">
-                            <h3><i class="fas fa-users"></i> Ustawienia graczy</h3>
-                            
-                            <div class="setting-item">
-                                <label class="setting-label">Maksymalna liczba graczy</label>
-                                <div class="slider-container">
-                                    <input type="range" class="slider" id="maxPlayers" 
-                                           min="1" max="100" value="20" oninput="updateSliderValue('maxPlayers', this.value)">
-                                    <div style="text-align: center; margin-top: 5px;">
-                                        <span id="maxPlayersValue">20</span> graczy
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="setting-item">
-                                <label class="setting-label">Tryb gry</label>
-                                <select class="setting-input" id="gamemode">
-                                    <option value="survival">Survival</option>
-                                    <option value="creative">Creative</option>
-                                    <option value="adventure">Adventure</option>
-                                    <option value="spectator">Spectator</option>
-                                </select>
-                            </div>
-                            
-                            <div class="setting-item">
-                                <label class="setting-label">Poziom trudności</label>
-                                <select class="setting-input" id="difficulty">
-                                    <option value="peaceful">Pokojowy</option>
-                                    <option value="easy">Łatwy</option>
-                                    <option value="normal" selected>Normalny</option>
-                                    <option value="hard">Trudny</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="setting-group">
-                            <h3><i class="fas fa-server"></i> Ustawienia serwera</h3>
-                            
-                            <div class="setting-item">
-                                <label class="setting-label">Odległość renderowania</label>
-                                <div class="slider-container">
-                                    <input type="range" class="slider" id="viewDistance" 
-                                           min="2" max="32" value="10" oninput="updateSliderValue('viewDistance', this.value)">
-                                    <div style="text-align: center; margin-top: 5px;">
-                                        <span id="viewDistanceValue">10</span> chunków
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="setting-item">
-                                <label class="setting-label">MOTD (wiadomość dnia)</label>
-                                <input type="text" class="setting-input" id="motd" 
-                                       value="Mój serwer Minecraft" placeholder="Nazwa serwera">
-                            </div>
-                            
-                            <div class="setting-item">
-                                <label class="setting-label">
-                                    <input type="checkbox" id="pvp" checked> PVP włączone
-                                </label>
-                            </div>
-                            
-                            <div class="setting-item">
-                                <label class="setting-label">
-                                    <input type="checkbox" id="commandBlocks"> Bloki komend
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="setting-group">
-                            <h3><i class="fas fa-shield-alt"></i> Bezpieczeństwo</h3>
-                            
-                            <div class="setting-item">
-                                <label class="setting-label">
-                                    <input type="checkbox" id="onlineMode" checked> Tryb online (Mojang auth)
-                                </label>
-                                <small style="color: var(--gray); display: block; margin-top: 5px;">
-                                    Wyłącz dla serwera lokalnego
-                                </small>
-                            </div>
-                            
-                            <div class="setting-item">
-                                <label class="setting-label">
-                                    <input type="checkbox" id="whiteList"> Whitelist
-                                </label>
-                            </div>
-                            
-                            <div class="setting-item">
-                                <label class="setting-label">Hasło serwera (opcjonalne)</label>
-                                <input type="password" class="setting-input" id="serverPassword" 
-                                       placeholder="Pozostaw puste aby wyłączyć">
-                            </div>
-                            
-                            <button class="action-btn start" id="saveSettingsBtn" style="width: 100%; margin-top: 20px;">
-                                <i class="fas fa-save"></i> Zapisz wszystkie ustawienia
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Zakładka Pluginy -->
-                <div class="tab-pane" id="plugins-tab">
-                    <div class="card">
-                        <h3><i class="fas fa-puzzle-piece"></i> Manager pluginów</h3>
-                        
-                        <div style="border: 2px dashed var(--border); padding: 30px; border-radius: 10px; 
-                                  text-align: center; margin-bottom: 20px;">
-                            <i class="fas fa-file-archive" style="font-size: 3rem; color: var(--primary); 
-                                margin-bottom: 15px;"></i>
-                            <p style="color: var(--gray); margin-bottom: 20px;">
-                                Przeciągnij i upuść pliki .jar pluginów tutaj
-                            </p>
-                            <input type="file" id="pluginUpload" accept=".jar" multiple 
-                                   style="display: none;">
-                            <button class="action-btn start" id="browsePluginsBtn" 
-                                    style="background: #9b59b6;">
-                                <i class="fas fa-folder-open"></i> Przeglądaj pluginy
-                            </button>
-                        </div>
-                        
-                        <h4 style="color: var(--primary); margin: 20px 0 10px 0;">
-                            <i class="fas fa-list"></i> Zainstalowane pluginy
-                        </h4>
-                        <div id="pluginsList" style="max-height: 300px; overflow-y: auto;">
-                            <div class="loading">
-                                <div class="spinner"></div>
-                                <p>Ładowanie pluginów...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <p class="hint">Upewnij się, że zaakceptowałeś EULA przed uruchomieniem serwera.</p>
             </div>
         </div>
-        
-        <!-- Informacje o połączeniu -->
-        <div style="background: var(--card-bg); padding: 15px; border-radius: 10px; 
-                   margin-top: 20px; border: 1px solid var(--border);">
-            <div style="display: flex; justify-content: space-between; align-items: center; 
-                       flex-wrap: wrap; gap: 10px;">
-                <div>
-                    <small style="color: var(--gray);">Połączenie:</small>
-                    <div style="font-family: monospace; font-size: 0.9rem; word-break: break-all;">
-                        <span id="backendUrl">https://turbo-fortnight-wr757r5wr7wrfgw75-5001.app.github.dev</span>
+
+        <div class="console-container">
+            <div class="console-header">
+                <h2><i class="fas fa-terminal"></i> Konsola Serwera</h2>
+                <div class="console-controls">
+                    <div class="auto-refresh">
+                        <input type="checkbox" id="autoRefresh" checked>
+                        <label for="autoRefresh">Auto-odświeżanie</label>
                     </div>
-                </div>
-                <div>
-                    <span id="connectionStatus" class="connection-status status-disconnected">
-                        <i class="fas fa-wifi"></i> Łączenie...
-                    </span>
+                    <button class="btn btn-small btn-primary" id="clearConsoleBtn">
+                        <i class="fas fa-broom"></i> Wyczyść
+                    </button>
                 </div>
             </div>
+            <div class="console-output">
+                <div id="consoleLog" class="loading">
+                    <div class="spinner"></div>
+                    <p>Ładowanie konsoli...</p>
+                </div>
+            </div>
+            <div class="console-input">
+                <input type="text" id="commandInput" placeholder="Wpisz komendę Minecraft (np. /help, /say)...">
+                <button class="btn btn-primary" id="sendCommandBtn">
+                    <i class="fas fa-paper-plane"></i> Wyślij
+                </button>
+            </div>
         </div>
-        
-        <!-- Stopka -->
-        <footer class="app-footer">
-            <p>Minecraft Control Panel v2.0 | 
-                <span id="lastCheck" style="color: var(--primary); font-weight: 600;">-</span>
-            </p>
+
+        <div class="connection-info">
+            <h3><i class="fas fa-info-circle"></i> Informacje o połączeniu</h3>
+            <p><strong>Adres serwera API:</strong> <code id="apiUrl">https://turbo-fortnight-wr757r5wr7wrfgw75-5001.app.github.dev</code></p>
+            <p><strong>Status połączenia:</strong> <span id="connectionStatus" class="status zatrzymany">Łączenie...</span></p>
+            <p><strong>Ścieżka serwera:</strong> <code>/workspaces/codespaces-blank/minecraft_serwer</code></p>
+        </div>
+
+        <footer>
+            <p>Minecraft Server Control Panel v2.0 | Panel sterowania serwerem Minecraft</p>
+            <p>Uwaga: Serwer Minecraft musi mieć zaakceptowane EULA przed uruchomieniem.</p>
         </footer>
     </div>
-    
-    <!-- Ukryty input do wgrywania plików -->
-    <input type="file" id="hiddenFileUpload" style="display: none;" multiple>
-    
-    <!-- Quick Actions Menu (mobile) -->
-    <div class="quick-actions">
-        <div class="quick-menu" id="quickMenu">
-            <button class="btn-small" onclick="switchTab('console')">
-                <i class="fas fa-terminal"></i> Konsola
-            </button>
-            <button class="btn-small" onclick="switchTab('version')">
-                <i class="fas fa-download"></i> Pobierz wersję
-            </button>
-            <button class="btn-small" onclick="switchTab('settings')">
-                <i class="fas fa-cog"></i> Ustawienia
-            </button>
-            <button class="btn-small" id="quickStartBtn">
-                <i class="fas fa-play"></i> Start serwera
-            </button>
+
+    <!-- Modal EULA -->
+    <div class="eula-modal" id="eulaModal">
+        <div class="eula-content">
+            <div class="eula-header">
+                <h2><i class="fas fa-file-contract"></i> Akceptacja Minecraft EULA</h2>
+            </div>
+            <div class="eula-body">
+                <div class="eula-text">
+                    <h3>Minecraft End User License Agreement (EULA)</h3>
+                    <p>Aby uruchomić serwer Minecraft, musisz zaakceptować warunki licencyjne Mojang Studios:</p>
+                    
+                    <ol>
+                        <li>Posiadasz legalną kopię gry Minecraft</li>
+                        <li>Nie będziesz używać serwera do komercyjnych celów bez odpowiedniej licencji</li>
+                        <li>Będziesz przestrzegać zasad społeczności Minecraft</li>
+                        <li>Serwer będzie używany zgodnie z przeznaczeniem</li>
+                    </ol>
+
+                    <p><strong>Pełna treść EULA:</strong> <a href="https://aka.ms/MinecraftEULA" target="_blank" style="color: #3498db;">https://aka.ms/MinecraftEULA</a></p>
+                    
+                    <div class="eula-warning">
+                        <p><strong><i class="fas fa-exclamation-triangle"></i> WAŻNE:</strong> Kliknięcie przycisku "Akceptuję EULA" spowoduje automatyczną zmianę pliku <code>eula.txt</code> w folderze serwera z <code>eula=false</code> na <code>eula=true</code>. Jest to wymagane przez Mojang Studios do legalnego uruchomienia serwera.</p>
+                    </div>
+
+                    <p>Po zaakceptowaniu EULA będziesz mógł uruchomić serwer Minecraft.</p>
+                </div>
+            </div>
+            <div class="eula-footer">
+                <div>
+                    <p><i class="fas fa-info-circle"></i> Status EULA: <span id="currentEulaStatus">Nieznany</span></p>
+                </div>
+                <div class="eula-buttons">
+                    <button class="btn btn-primary" id="acceptEulaBtn">
+                        <i class="fas fa-check-circle"></i> Akceptuję EULA
+                    </button>
+                    <button class="btn btn-danger" id="cancelEulaBtn">
+                        <i class="fas fa-times-circle"></i> Anuluj
+                    </button>
+                </div>
+            </div>
         </div>
-        <button class="quick-menu-btn" id="quickMenuBtn">
-            <i class="fas fa-bars"></i>
-        </button>
     </div>
-    
-    <script src="mobile_controller.js"></script>
+
     <script>
-        // Proste funkcje pomocnicze
-        function updateSliderValue(sliderId, value) {
-            document.getElementById(sliderId + 'Value').textContent = value;
-        }
-        
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.tab === tabName);
-            });
-            document.querySelectorAll('.tab-pane').forEach(pane => {
-                pane.classList.toggle('active', pane.id === tabName + '-tab');
-            });
-            document.getElementById('quickMenu').classList.remove('show');
-        }
-        
-        // Quick menu toggle
-        document.getElementById('quickMenuBtn').addEventListener('click', function() {
-            document.getElementById('quickMenu').classList.toggle('show');
+        // Konfiguracja
+        const API_URL = "https://turbo-fortnight-wr757r5wr7wrfgw75-5001.app.github.dev";
+        let isConnected = false;
+        let autoRefreshEnabled = true;
+        let refreshInterval = null;
+        let eulaAccepted = false;
+
+        // Elementy DOM
+        const elements = {
+            // Status
+            serverStatus: document.getElementById('serverStatus'),
+            statusText: document.getElementById('statusText'),
+            engineInfo: document.getElementById('engineInfo'),
+            versionInfo: document.getElementById('versionInfo'),
+            playerCount: document.getElementById('playerCount'),
+            eulaStatus: document.getElementById('eulaStatus'),
+            lastUpdate: document.getElementById('lastUpdate'),
+            
+            // Przyciski
+            startBtn: document.getElementById('startBtn'),
+            stopBtn: document.getElementById('stopBtn'),
+            restartBtn: document.getElementById('restartBtn'),
+            eulaStatusBtn: document.getElementById('eulaStatusBtn'),
+            refreshStatusBtn: document.getElementById('refreshStatusBtn'),
+            showEulaBtn: document.getElementById('showEulaBtn'),
+            
+            // Konsola
+            consoleLog: document.getElementById('consoleLog'),
+            commandInput: document.getElementById('commandInput'),
+            sendCommandBtn: document.getElementById('sendCommandBtn'),
+            clearConsoleBtn: document.getElementById('clearConsoleBtn'),
+            autoRefreshCheckbox: document.getElementById('autoRefresh'),
+            
+            // Połączenie
+            apiUrl: document.getElementById('apiUrl'),
+            connectionStatus: document.getElementById('connectionStatus'),
+            
+            // EULA
+            eulaModal: document.getElementById('eulaModal'),
+            eulaWarningBox: document.getElementById('eulaWarningBox'),
+            acceptEulaBtn: document.getElementById('acceptEulaBtn'),
+            cancelEulaBtn: document.getElementById('cancelEulaBtn'),
+            currentEulaStatus: document.getElementById('currentEulaStatus')
+        };
+
+        // Inicjalizacja
+        document.addEventListener('DOMContentLoaded', function() {
+            elements.apiUrl.textContent = API_URL;
+            setupEventListeners();
+            checkConnection();
+            startAutoRefresh();
+            
+            // Ukryj loading spinner po załadowaniu
+            setTimeout(() => {
+                const loadingDiv = elements.consoleLog.querySelector('.loading');
+                if (loadingDiv) {
+                    loadingDiv.style.display = 'none';
+                }
+            }, 1000);
         });
-        
-        // Close quick menu when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.quick-actions')) {
-                document.getElementById('quickMenu').classList.remove('show');
+
+        function setupEventListeners() {
+            // Podstawowe przyciski kontroli
+            elements.startBtn.addEventListener('click', () => sendCommand('start'));
+            elements.stopBtn.addEventListener('click', () => sendCommand('stop'));
+            elements.restartBtn.addEventListener('click', () => sendCommand('restart'));
+            elements.refreshStatusBtn.addEventListener('click', checkStatus);
+            
+            // Konsola
+            elements.sendCommandBtn.addEventListener('click', sendCustomCommand);
+            elements.clearConsoleBtn.addEventListener('click', clearConsole);
+            elements.commandInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendCustomCommand();
+            });
+            
+            elements.autoRefreshCheckbox.addEventListener('change', (e) => {
+                autoRefreshEnabled = e.target.checked;
+                if (autoRefreshEnabled) {
+                    startAutoRefresh();
+                } else {
+                    stopAutoRefresh();
+                }
+            });
+            
+            // EULA
+            elements.eulaStatusBtn.addEventListener('click', showEulaModal);
+            elements.showEulaBtn.addEventListener('click', showEulaModal);
+            elements.acceptEulaBtn.addEventListener('click', acceptEula);
+            elements.cancelEulaBtn.addEventListener('click', hideEulaModal);
+            
+            // Zamknij modal po kliknięciu poza nim
+            elements.eulaModal.addEventListener('click', (e) => {
+                if (e.target === elements.eulaModal) {
+                    hideEulaModal();
+                }
+            });
+            
+            // Escape zamyka modal
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && elements.eulaModal.classList.contains('active')) {
+                    hideEulaModal();
+                }
+            });
+        }
+
+        function showEulaModal() {
+            elements.eulaModal.classList.add('active');
+            elements.currentEulaStatus.textContent = eulaAccepted ? '✅ Zaakceptowana' : '❌ Wymaga akceptacji';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideEulaModal() {
+            elements.eulaModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        async function checkConnection() {
+            try {
+                updateConnectionStatus('⌛ Łączenie...', '#f39c12');
+                
+                const response = await fetch(`${API_URL}/api/status`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                isConnected = true;
+                updateConnectionStatus('✅ Połączono', '#2ecc71');
+                updateStatus(data);
+                
+                // Aktualizuj status EULA
+                eulaAccepted = data.eula_accepted || false;
+                updateEulaStatus(eulaAccepted);
+                
+                elements.lastUpdate.textContent = new Date().toLocaleTimeString('pl-PL');
+                
+                return true;
+                
+            } catch (error) {
+                console.error('Connection error:', error);
+                isConnected = false;
+                updateConnectionStatus('❌ Brak połączenia', '#e74c3c');
+                
+                // Retry after 5 seconds
+                setTimeout(() => checkConnection(), 5000);
+                return false;
             }
-        });
-        
-        // Prevent zoom on double-tap
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', function(event) {
-            const now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) {
-                event.preventDefault();
+        }
+
+        async function checkStatus() {
+            if (!isConnected) {
+                await checkConnection();
+                return;
             }
-            lastTouchEnd = now;
-        }, false);
+            
+            try {
+                const response = await fetch(`${API_URL}/api/status`);
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                updateStatus(data);
+                
+                // Aktualizuj status EULA
+                eulaAccepted = data.eula_accepted || false;
+                updateEulaStatus(eulaAccepted);
+                
+                elements.lastUpdate.textContent = new Date().toLocaleTimeString('pl-PL');
+                
+            } catch (error) {
+                console.error('Status check failed:', error);
+                isConnected = false;
+                updateConnectionStatus('⚠️ Błąd połączenia', '#e74c3c');
+            }
+        }
+
+        function updateStatus(data) {
+            const status = data.status || 'unknown';
+            
+            // Aktualizuj wskaźnik statusu
+            const statusConfig = {
+                'running': {
+                    text: '🟢 SERWER DZIAŁA',
+                    class: 'działa',
+                    icon: '🟢',
+                    startBtnDisabled: true,
+                    stopBtnDisabled: false,
+                    restartBtnDisabled: false
+                },
+                'stopped': {
+                    text: '🔴 SERWER ZATRZYMANY',
+                    class: 'zatrzymany',
+                    icon: '🔴',
+                    startBtnDisabled: !eulaAccepted, // Start tylko gdy EULA zaakceptowana
+                    stopBtnDisabled: true,
+                    restartBtnDisabled: true
+                },
+                'starting': {
+                    text: '🟡 URUCHAMIANIE...',
+                    class: 'uruchamianie',
+                    icon: '🟡',
+                    startBtnDisabled: true,
+                    stopBtnDisabled: false,
+                    restartBtnDisabled: true
+                },
+                'stopping': {
+                    text: '🟡 ZATRZYMOWANIE...',
+                    class: 'uruchamianie',
+                    icon: '🟡',
+                    startBtnDisabled: true,
+                    stopBtnDisabled: true,
+                    restartBtnDisabled: true
+                },
+                'unknown': {
+                    text: '⚪ STATUS NIEZNANY',
+                    class: 'unknown',
+                    icon: '⚪',
+                    startBtnDisabled: true,
+                    stopBtnDisabled: true,
+                    restartBtnDisabled: true
+                }
+            };
+            
+            const config = statusConfig[status] || statusConfig.unknown;
+            
+            elements.statusText.textContent = config.text;
+            elements.serverStatus.className = `status ${config.class}`;
+            elements.serverStatus.querySelector('.status-icon').textContent = config.icon;
+            
+            // Aktualizuj przyciski
+            elements.startBtn.disabled = config.startBtnDisabled;
+            elements.stopBtn.disabled = config.stopBtnDisabled;
+            elements.restartBtn.disabled = config.restartBtnDisabled;
+            
+            // Aktualizuj informacje
+            elements.engineInfo.textContent = data.engine || 'Paper';
+            elements.versionInfo.textContent = data.version || '1.20.4';
+            elements.playerCount.textContent = data.player_count || 0;
+            
+            // Logi
+            if (data.logs && data.logs.length > 0) {
+                displayLogs(data.logs);
+            }
+        }
+
+        function updateEulaStatus(accepted) {
+            eulaAccepted = accepted;
+            
+            if (accepted) {
+                elements.eulaStatus.textContent = '✅ Zaakceptowana';
+                elements.eulaStatus.style.color = '#2ecc71';
+                elements.eulaWarningBox.style.display = 'none';
+                elements.currentEulaStatus.textContent = '✅ Zaakceptowana';
+                
+                // Włącz przycisk Start jeśli serwer jest zatrzymany
+                if (elements.startBtn.disabled && !elements.stopBtn.disabled) {
+                    elements.startBtn.disabled = false;
+                }
+            } else {
+                elements.eulaStatus.textContent = '❌ Wymaga akceptacji';
+                elements.eulaStatus.style.color = '#e74c3c';
+                elements.eulaWarningBox.style.display = 'block';
+                elements.currentEulaStatus.textContent = '❌ Wymaga akceptacji';
+                
+                // Wyłącz przycisk Start
+                elements.startBtn.disabled = true;
+            }
+            
+            // Aktualizuj tooltip na przycisku Start
+            if (!accepted) {
+                elements.startBtn.title = 'Akceptuj EULA aby uruchomić serwer';
+            } else {
+                elements.startBtn.title = 'Uruchom serwer';
+            }
+        }
+
+        async function sendCommand(command) {
+            if (!isConnected) {
+                showNotification('Brak połączenia z serwerem API', 'error');
+                return;
+            }
+            
+            // Sprawdź EULA dla komendy start
+            if (command === 'start' && !eulaAccepted) {
+                showNotification('Musisz zaakceptować EULA przed uruchomieniem serwera', 'error');
+                showEulaModal();
+                return;
+            }
+            
+            const button = elements[`${command}Btn`];
+            const originalText = button.innerHTML;
+            const originalDisabled = button.disabled;
+            
+            button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Wysyłanie...`;
+            button.disabled = true;
+            
+            logToConsole(`Wysyłanie komendy: ${command}`, 'system');
+            
+            try {
+                const response = await fetch(`${API_URL}/api/command`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: command })
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    logToConsole(`✅ ${data.message}`, 'success');
+                } else {
+                    showNotification(data.message, 'error');
+                    logToConsole(`❌ ${data.message}`, 'error');
+                }
+                
+                // Odśwież status po komendzie
+                setTimeout(() => checkStatus(), 2000);
+                
+            } catch (error) {
+                console.error('Command error:', error);
+                showNotification(`Błąd: ${error.message}`, 'error');
+                logToConsole(`❌ Błąd: ${error.message}`, 'error');
+                
+            } finally {
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.disabled = originalDisabled;
+                }, 1000);
+            }
+        }
+
+        async function sendCustomCommand() {
+            const command = elements.commandInput.value.trim();
+            if (!command || !isConnected) return;
+            
+            logToConsole(`> ${command}`, 'system');
+            
+            try {
+                const response = await fetch(`${API_URL}/api/command`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: command })
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                logToConsole(`📨 ${data.message}`, 'info');
+                
+                elements.commandInput.value = '';
+                setTimeout(() => checkStatus(), 1000);
+                
+            } catch (error) {
+                logToConsole(`❌ Błąd: ${error.message}`, 'error');
+            }
+        }
+
+        async function acceptEula() {
+            if (!isConnected) {
+                showNotification('Brak połączenia z serwerem API', 'error');
+                return;
+            }
+            
+            logToConsole('Akceptowanie EULA...', 'system');
+            
+            try {
+                const response = await fetch(`${API_URL}/api/eula/accept`, {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('✅ EULA zaakceptowana! Możesz teraz uruchomić serwer.', 'success');
+                    logToConsole('✅ EULA zaakceptowana', 'success');
+                    
+                    // Aktualizuj status EULA
+                    eulaAccepted = true;
+                    updateEulaStatus(true);
+                    
+                    // Zamknij modal
+                    setTimeout(() => hideEulaModal(), 1500);
+                    
+                    // Odśwież status serwera
+                    setTimeout(() => checkStatus(), 1000);
+                    
+                } else {
+                    showNotification(`❌ ${data.message}`, 'error');
+                    logToConsole(`❌ ${data.message}`, 'error');
+                }
+                
+            } catch (error) {
+                console.error('EULA acceptance error:', error);
+                showNotification(`Błąd akceptacji EULA: ${error.message}`, 'error');
+                logToConsole(`❌ Błąd: ${error.message}`, 'error');
+            }
+        }
+
+        function displayLogs(logs) {
+            const consoleEl = elements.consoleLog;
+            
+            // Usuń loading spinner jeśli istnieje
+            const loadingDiv = consoleEl.querySelector('.loading');
+            if (loadingDiv) {
+                loadingDiv.style.display = 'none';
+            }
+            
+            let html = '';
+            logs.forEach(log => {
+                const type = getLogType(log);
+                html += `<div class="log-${type}">${escapeHtml(log)}</div>`;
+            });
+            
+            consoleEl.innerHTML = html;
+            
+            // Auto-scroll do dołu
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+
+        function logToConsole(message, type = 'info') {
+            const consoleEl = elements.consoleLog;
+            
+            // Usuń loading spinner jeśli istnieje
+            const loadingDiv = consoleEl.querySelector('.loading');
+            if (loadingDiv) {
+                loadingDiv.style.display = 'none';
+            }
+            
+            const timestamp = new Date().toLocaleTimeString('pl-PL');
+            const logEntry = `[${timestamp}] ${message}`;
+            
+            const logDiv = document.createElement('div');
+            logDiv.className = `log-${type}`;
+            logDiv.textContent = logEntry;
+            
+            consoleEl.appendChild(logDiv);
+            
+            // Auto-scroll do dołu
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+            
+            // Ogranicz do 200 linii
+            const lines = consoleEl.children;
+            if (lines.length > 200) {
+                for (let i = 0; i < lines.length - 200; i++) {
+                    consoleEl.removeChild(lines[i]);
+                }
+            }
+        }
+
+        function clearConsole() {
+            elements.consoleLog.innerHTML = '<div class="loading"><div class="spinner"></div><p>Konsola wyczyszczona</p></div>';
+            logToConsole('Konsola wyczyszczona', 'system');
+        }
+
+        function getLogType(log) {
+            const l = log.toLowerCase();
+            if (l.includes('error') || l.includes('failed') || l.includes('exception')) {
+                return 'error';
+            } else if (l.includes('warning') || l.includes('warn')) {
+                return 'warning';
+            } else if (l.includes('success') || l.includes('done') || l.includes('✅')) {
+                return 'success';
+            } else if (l.includes('joined') || l.includes('left') || l.includes('player')) {
+                return 'system';
+            } else if (l.includes('info') || l.includes('[info]')) {
+                return 'info';
+            }
+            return 'info';
+        }
+
+        function updateConnectionStatus(text, color) {
+            elements.connectionStatus.textContent = ` ${text}`;
+            elements.connectionStatus.style.color = color;
+            elements.connectionStatus.style.borderColor = color;
+        }
+
+        function startAutoRefresh() {
+            if (refreshInterval) clearInterval(refreshInterval);
+            
+            if (autoRefreshEnabled) {
+                refreshInterval = setInterval(() => {
+                    if (isConnected) {
+                        checkStatus();
+                    }
+                }, 3000);
+            }
+        }
+
+        function stopAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+                refreshInterval = null;
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            // Usuń istniejące notyfikacje
+            document.querySelectorAll('.notification').forEach(n => n.remove());
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                ${message}
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
     </script>
 </body>
 </html>
