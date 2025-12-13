@@ -47,6 +47,40 @@
             font-size: 1.1rem;
         }
 
+        .nav-tabs {
+            display: flex;
+            background-color: rgba(40, 40, 60, 0.8);
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            border: 1px solid #444;
+        }
+
+        .nav-tab {
+            flex: 1;
+            text-align: center;
+            padding: 20px;
+            text-decoration: none;
+            color: #95a5a6;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .nav-tab:hover {
+            background-color: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+        }
+
+        .nav-tab.active {
+            background-color: #3498db;
+            color: white;
+        }
+
         .control-panel {
             display: grid;
             grid-template-columns: 1fr 2fr;
@@ -412,59 +446,6 @@
             gap: 15px;
         }
 
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            border-radius: 8px;
-            color: white;
-            font-weight: bold;
-            z-index: 1001;
-            animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            max-width: 400px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .notification.success {
-            background-color: #2ecc71;
-        }
-
-        .notification.error {
-            background-color: #e74c3c;
-        }
-
-        .notification.warning {
-            background-color: #f39c12;
-        }
-
-        .notification.info {
-            background-color: #3498db;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes fadeOut {
-            from {
-                opacity: 1;
-            }
-            to {
-                opacity: 0;
-            }
-        }
-
         /* EULA Warning Box */
         .eula-warning-box {
             background-color: rgba(231, 76, 60, 0.1);
@@ -534,180 +515,61 @@
             color: #9b59b6;
         }
 
-        /* File Manager Modal */
-        .file-manager-modal {
+        /* Notification */
+        .notification {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.9);
-            z-index: 1002;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .file-manager-modal.active {
-            display: flex;
-        }
-
-        .file-manager-content {
-            background-color: #1a1a2e;
-            border-radius: 15px;
-            max-width: 95%;
-            width: 1200px;
-            max-height: 90vh;
-            overflow: hidden;
-            border: 3px solid #3498db;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
-        }
-
-        .file-manager-header {
-            background-color: #3498db;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: white;
-        }
-
-        .file-manager-header h2 {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .file-manager-body {
-            padding: 25px;
-            overflow-y: auto;
-            max-height: 70vh;
-        }
-
-        .file-path-display {
-            background-color: #2c3e50;
-            padding: 12px 20px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            font-family: monospace;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .file-actions-bar {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .file-table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: rgba(40, 40, 60, 0.8);
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
             border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .file-table th {
-            background-color: #2c3e50;
-            padding: 15px;
-            text-align: left;
-            color: #3498db;
+            color: white;
             font-weight: bold;
-            border-bottom: 2px solid #3498db;
-        }
-
-        .file-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .file-table tr:hover {
-            background-color: rgba(52, 152, 219, 0.1);
-        }
-
-        .file-icon {
-            margin-right: 8px;
-            color: #3498db;
-        }
-
-        .folder-icon {
-            color: #f39c12;
-        }
-
-        .file-edit-container {
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        .file-edit-header {
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #444;
-        }
-
-        .file-edit-textarea {
-            width: 100%;
-            min-height: 500px;
-            max-height: 60vh;
-            background-color: #1a1a2e;
-            color: #e0e0e0;
-            border: 1px solid #444;
-            border-radius: 6px;
-            padding: 20px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.5;
-            resize: vertical;
-            white-space: pre;
-            overflow-x: auto;
-        }
-
-        .file-save-buttons {
+            z-index: 1001;
+            animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
             display: flex;
-            justify-content: flex-end;
+            align-items: center;
             gap: 10px;
-            margin-top: 20px;
         }
 
-        /* Formularz upload */
-        .upload-form {
-            background-color: rgba(40, 40, 60, 0.8);
-            padding: 25px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+        .notification.success {
+            background-color: #2ecc71;
         }
 
-        .upload-form h3 {
-            color: #3498db;
-            margin-bottom: 15px;
+        .notification.error {
+            background-color: #e74c3c;
         }
 
-        .upload-form input[type="text"] {
-            width: 100%;
-            padding: 15px;
-            background-color: #2c3e50;
-            color: white;
-            border: 1px solid #444;
-            border-radius: 6px;
-            font-size: 16px;
-            margin-bottom: 15px;
+        .notification.warning {
+            background-color: #f39c12;
         }
 
-        .upload-form input[type="file"] {
-            width: 100%;
-            padding: 15px;
-            background-color: #2c3e50;
-            color: white;
-            border: 1px solid #444;
-            border-radius: 6px;
-            margin-bottom: 15px;
+        .notification.info {
+            background-color: #3498db;
         }
 
-        /* Menu dodatkowe */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+
+        /* Extra menu */
         .extra-menu {
             background-color: rgba(40, 40, 60, 0.8);
             padding: 20px;
@@ -729,41 +591,6 @@
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
         }
-
-        /* Dropdown */
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #2c3e50;
-            min-width: 200px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-            z-index: 1;
-            border-radius: 8px;
-            overflow: hidden;
-            top: 100%;
-            left: 0;
-        }
-
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
-
-        .dropdown-content a {
-            color: #e0e0e0;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            transition: background-color 0.3s;
-        }
-
-        .dropdown-content a:hover {
-            background-color: #3498db;
-        }
     </style>
 </head>
 <body>
@@ -772,6 +599,18 @@
             <h1><i class="fas fa-gamepad"></i> Minecraft Server Control Panel</h1>
             <p class="subtitle">Zarządzaj serwerem Minecraft z poziomu przeglądarki</p>
         </header>
+
+        <div class="nav-tabs">
+            <a href="/" class="nav-tab active">
+                <i class="fas fa-server"></i> Panel Serwera
+            </a>
+            <a href="/filemanager" class="nav-tab">
+                <i class="fas fa-folder-open"></i> File Manager
+            </a>
+            <a href="/javamanager" class="nav-tab">
+                <i class="fab fa-java"></i> Java Manager
+            </a>
+        </div>
 
         <!-- EULA Warning Box - pokazuje się tylko gdy EULA nie jest zaakceptowana -->
         <div class="eula-warning-box" id="eulaWarningBox" style="display: none;">
@@ -818,17 +657,6 @@
                     <button class="btn btn-primary" id="refreshStatusBtn">
                         <i class="fas fa-sync-alt"></i> Odśwież Status
                     </button>
-                    <div class="dropdown">
-                        <button class="btn btn-primary">
-                            <i class="fas fa-tools"></i> Narzędzia
-                        </button>
-                        <div class="dropdown-content">
-                            <a href="#" id="openFileManagerBtn"><i class="fas fa-folder-open"></i> File Manager</a>
-                            <a href="#" id="versionManagerBtn"><i class="fas fa-download"></i> Version Manager</a>
-                            <a href="#" id="pluginsManagerBtn"><i class="fas fa-puzzle-piece"></i> Plugins</a>
-                            <a href="#" id="serverSettingsBtn"><i class="fas fa-cog"></i> Server Settings</a>
-                        </div>
-                    </div>
                 </div>
                 <p class="hint">Upewnij się, że zaakceptowałeś EULA przed uruchomieniem serwera.</p>
             </div>
@@ -935,87 +763,13 @@
         </div>
     </div>
 
-    <!-- File Manager Modal -->
-    <div class="file-manager-modal" id="fileManagerModal">
-        <div class="file-manager-content">
-            <div class="file-manager-header">
-                <h2><i class="fas fa-folder-open"></i> File Manager</h2>
-                <button class="btn btn-small btn-danger" id="closeFileManagerBtn">
-                    <i class="fas fa-times"></i> Zamknij
-                </button>
-            </div>
-            <div class="file-manager-body">
-                <div class="file-path-display">
-                    <span id="currentPathDisplay">/</span>
-                    <div class="file-actions-bar">
-                        <button class="btn btn-small btn-primary" id="refreshFilesBtn">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
-                        <button class="btn btn-small btn-success" id="uploadFileBtn">
-                            <i class="fas fa-upload"></i> Upload
-                        </button>
-                        <button class="btn btn-small btn-warning" id="createFolderBtn">
-                            <i class="fas fa-folder-plus"></i> Folder
-                        </button>
-                        <button class="btn btn-small btn-primary" id="goUpBtn" style="display: none;">
-                            <i class="fas fa-level-up-alt"></i> Up
-                        </button>
-                    </div>
-                </div>
-                
-                <div id="fileManagerContent">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p>Ładowanie plików...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Upload Modal -->
-    <div class="eula-modal" id="uploadModal">
-        <div class="eula-content">
-            <div class="eula-header">
-                <h2><i class="fas fa-upload"></i> Upload Pliku</h2>
-            </div>
-            <div class="eula-body">
-                <div class="upload-form">
-                    <h3>Wybierz plik do wgrania</h3>
-                    <input type="text" id="uploadFolderPath" placeholder="Folder docelowy (pozostaw puste dla głównego)" value="">
-                    <input type="file" id="fileToUpload">
-                    <div id="uploadProgress" style="display: none;">
-                        <div style="background: #2c3e50; height: 20px; border-radius: 10px; overflow: hidden; margin: 10px 0;">
-                            <div id="uploadProgressBar" style="background: #3498db; height: 100%; width: 0%; transition: width 0.3s;"></div>
-                        </div>
-                        <p id="uploadStatus">Przygotowywanie...</p>
-                    </div>
-                </div>
-            </div>
-            <div class="eula-footer">
-                <div>
-                    <p id="uploadMessage"></p>
-                </div>
-                <div class="eula-buttons">
-                    <button class="btn btn-primary" id="performUploadBtn">
-                        <i class="fas fa-upload"></i> Upload
-                    </button>
-                    <button class="btn btn-danger" id="cancelUploadBtn">
-                        <i class="fas fa-times-circle"></i> Anuluj
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
         // Konfiguracja
-        const API_URL = "https://turbo-fortnight-wr757r5wr7wrfgw75-5001.app.github.dev";
+        const API_URL = window.location.origin;
         let isConnected = false;
         let autoRefreshEnabled = true;
         let refreshInterval = null;
         let eulaAccepted = false;
-        let currentFilePath = '';
 
         // Elementy DOM
         const elements = {
@@ -1054,32 +808,7 @@
             cancelEulaBtn: document.getElementById('cancelEulaBtn'),
             currentEulaStatus: document.getElementById('currentEulaStatus'),
             
-            // File Manager
-            fileManagerModal: document.getElementById('fileManagerModal'),
-            openFileManagerBtn: document.getElementById('openFileManagerBtn'),
-            closeFileManagerBtn: document.getElementById('closeFileManagerBtn'),
-            refreshFilesBtn: document.getElementById('refreshFilesBtn'),
-            uploadFileBtn: document.getElementById('uploadFileBtn'),
-            createFolderBtn: document.getElementById('createFolderBtn'),
-            goUpBtn: document.getElementById('goUpBtn'),
-            currentPathDisplay: document.getElementById('currentPathDisplay'),
-            fileManagerContent: document.getElementById('fileManagerContent'),
-            
-            // Upload
-            uploadModal: document.getElementById('uploadModal'),
-            uploadFolderPath: document.getElementById('uploadFolderPath'),
-            fileToUpload: document.getElementById('fileToUpload'),
-            performUploadBtn: document.getElementById('performUploadBtn'),
-            cancelUploadBtn: document.getElementById('cancelUploadBtn'),
-            uploadProgress: document.getElementById('uploadProgress'),
-            uploadProgressBar: document.getElementById('uploadProgressBar'),
-            uploadStatus: document.getElementById('uploadStatus'),
-            uploadMessage: document.getElementById('uploadMessage'),
-            
             // Tools
-            versionManagerBtn: document.getElementById('versionManagerBtn'),
-            pluginsManagerBtn: document.getElementById('pluginsManagerBtn'),
-            serverSettingsBtn: document.getElementById('serverSettingsBtn'),
             quickBackupBtn: document.getElementById('quickBackupBtn'),
             quickWhitelistBtn: document.getElementById('quickWhitelistBtn'),
             quickOpsBtn: document.getElementById('quickOpsBtn'),
@@ -1145,26 +874,11 @@
                 }
             });
             
-            // File Manager
-            elements.openFileManagerBtn.addEventListener('click', openFileManager);
-            elements.closeFileManagerBtn.addEventListener('click', closeFileManager);
-            elements.refreshFilesBtn.addEventListener('click', () => loadFiles(currentFilePath));
-            elements.uploadFileBtn.addEventListener('click', showUploadModal);
-            elements.createFolderBtn.addEventListener('click', createNewFolder);
-            elements.goUpBtn.addEventListener('click', goUpFolder);
-            
-            // Upload
-            elements.performUploadBtn.addEventListener('click', performUpload);
-            elements.cancelUploadBtn.addEventListener('click', hideUploadModal);
-            
             // Tools
-            elements.versionManagerBtn.addEventListener('click', () => showNotification('Version Manager - Wkrótce!', 'info'));
-            elements.pluginsManagerBtn.addEventListener('click', () => showNotification('Plugins Manager - Wkrótce!', 'info'));
-            elements.serverSettingsBtn.addEventListener('click', openServerProperties);
             elements.quickBackupBtn.addEventListener('click', createBackup);
-            elements.quickWhitelistBtn.addEventListener('click', manageWhitelist);
-            elements.quickOpsBtn.addEventListener('click', manageOps);
-            elements.quickPropertiesBtn.addEventListener('click', openServerProperties);
+            elements.quickWhitelistBtn.addEventListener('click', () => window.open('/filemanager?file=whitelist.json', '_blank'));
+            elements.quickOpsBtn.addEventListener('click', () => window.open('/filemanager?file=ops.json', '_blank'));
+            elements.quickPropertiesBtn.addEventListener('click', () => window.open('/filemanager?file=server.properties', '_blank'));
         }
 
         function showEulaModal() {
@@ -1175,20 +889,6 @@
 
         function hideEulaModal() {
             elements.eulaModal.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
-
-        function showUploadModal() {
-            elements.uploadModal.classList.add('active');
-            elements.uploadFolderPath.value = currentFilePath;
-            elements.uploadProgress.style.display = 'none';
-            elements.uploadProgressBar.style.width = '0%';
-            elements.uploadMessage.textContent = '';
-            document.body.style.overflow = 'hidden';
-        }
-
-        function hideUploadModal() {
-            elements.uploadModal.classList.remove('active');
             document.body.style.overflow = 'auto';
         }
 
@@ -1270,7 +970,7 @@
                     text: '🔴 SERWER ZATRZYMANY',
                     class: 'zatrzymany',
                     icon: '🔴',
-                    startBtnDisabled: !eulaAccepted, // Start tylko gdy EULA zaakceptowana
+                    startBtnDisabled: !eulaAccepted,
                     stopBtnDisabled: true,
                     restartBtnDisabled: true
                 },
@@ -1331,7 +1031,6 @@
                 elements.eulaWarningBox.style.display = 'none';
                 elements.currentEulaStatus.textContent = '✅ Zaakceptowana';
                 
-                // Włącz przycisk Start jeśli serwer jest zatrzymany
                 if (elements.startBtn.disabled && !elements.stopBtn.disabled) {
                     elements.startBtn.disabled = false;
                 }
@@ -1341,11 +1040,9 @@
                 elements.eulaWarningBox.style.display = 'block';
                 elements.currentEulaStatus.textContent = '❌ Wymaga akceptacji';
                 
-                // Wyłącz przycisk Start
                 elements.startBtn.disabled = true;
             }
             
-            // Aktualizuj tooltip na przycisku Start
             if (!accepted) {
                 elements.startBtn.title = 'Akceptuj EULA aby uruchomić serwer';
             } else {
@@ -1359,7 +1056,6 @@
                 return;
             }
             
-            // Sprawdź EULA dla komendy start
             if (command === 'start' && !eulaAccepted) {
                 showNotification('Musisz zaakceptować EULA przed uruchomieniem serwera', 'error');
                 showEulaModal();
@@ -1397,7 +1093,6 @@
                     logToConsole(`❌ ${data.message}`, 'error');
                 }
                 
-                // Odśwież status po komendzie
                 setTimeout(() => checkStatus(), 2000);
                 
             } catch (error) {
@@ -1460,14 +1155,10 @@
                     showNotification('✅ EULA zaakceptowana! Możesz teraz uruchomić serwer.', 'success');
                     logToConsole('✅ EULA zaakceptowana', 'success');
                     
-                    // Aktualizuj status EULA
                     eulaAccepted = true;
                     updateEulaStatus(true);
                     
-                    // Zamknij modal
                     setTimeout(() => hideEulaModal(), 1500);
-                    
-                    // Odśwież status serwera
                     setTimeout(() => checkStatus(), 1000);
                     
                 } else {
@@ -1485,7 +1176,6 @@
         function displayLogs(logs) {
             const consoleEl = elements.consoleLog;
             
-            // Usuń loading spinner jeśli istnieje
             const loadingDiv = consoleEl.querySelector('.loading');
             if (loadingDiv) {
                 loadingDiv.style.display = 'none';
@@ -1498,15 +1188,12 @@
             });
             
             consoleEl.innerHTML = html;
-            
-            // Auto-scroll do dołu
             consoleEl.scrollTop = consoleEl.scrollHeight;
         }
 
         function logToConsole(message, type = 'info') {
             const consoleEl = elements.consoleLog;
             
-            // Usuń loading spinner jeśli istnieje
             const loadingDiv = consoleEl.querySelector('.loading');
             if (loadingDiv) {
                 loadingDiv.style.display = 'none';
@@ -1520,11 +1207,8 @@
             logDiv.textContent = logEntry;
             
             consoleEl.appendChild(logDiv);
-            
-            // Auto-scroll do dołu
             consoleEl.scrollTop = consoleEl.scrollHeight;
             
-            // Ogranicz do 200 linii
             const lines = consoleEl.children;
             if (lines.length > 200) {
                 for (let i = 0; i < lines.length - 200; i++) {
@@ -1580,7 +1264,6 @@
         }
 
         function showNotification(message, type = 'info') {
-            // Usuń istniejące notyfikacje
             document.querySelectorAll('.notification').forEach(n => n.remove());
             
             const notification = document.createElement('div');
@@ -1603,315 +1286,6 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
-        }
-
-        // File Manager Functions
-        function openFileManager() {
-            elements.fileManagerModal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            currentFilePath = '';
-            loadFiles('');
-        }
-
-        function closeFileManager() {
-            elements.fileManagerModal.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
-
-        async function loadFiles(path) {
-            currentFilePath = path || '';
-            
-            try {
-                const response = await fetch(`${API_URL}/api/files/list?path=${encodeURIComponent(path)}`);
-                const data = await response.json();
-                
-                if (data.error) {
-                    elements.fileManagerContent.innerHTML = `<div class="notification error">${data.error}</div>`;
-                    return;
-                }
-                
-                // Aktualizuj ścieżkę
-                elements.currentPathDisplay.textContent = data.path ? `/${data.path}` : '/';
-                
-                // Pokaż/ukryj przycisk Up
-                elements.goUpBtn.style.display = data.path ? 'block' : 'none';
-                
-                // Generuj tabelę
-                let html = `
-                    <table class="file-table">
-                        <thead>
-                            <tr>
-                                <th>Nazwa</th>
-                                <th>Typ</th>
-                                <th>Rozmiar</th>
-                                <th>Zmodyfikowano</th>
-                                <th>Akcje</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-                
-                // Dodaj ".." dla powrotu
-                if (data.path && data.path !== '') {
-                    const parentPath = data.path.split('/').slice(0, -1).join('/');
-                    html += `
-                        <tr>
-                            <td colspan="5">
-                                <button class="btn btn-small btn-primary" onclick="loadFiles('${parentPath}')">
-                                    <i class="fas fa-level-up-alt"></i> .. (powrót)
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                }
-                
-                // Pliki i foldery
-                data.files.forEach(file => {
-                    const size = file.type === 'folder' ? '-' : formatFileSize(file.size);
-                    const date = new Date(file.modified * 1000).toLocaleString('pl-PL');
-                    const icon = file.type === 'folder' ? 'fa-folder folder-icon' : 'fa-file file-icon';
-                    
-                    html += `
-                        <tr>
-                            <td>
-                                <i class="fas ${icon}"></i>
-                                ${file.name}
-                            </td>
-                            <td>${file.type === 'folder' ? 'Folder' : 'Plik'}</td>
-                            <td>${size}</td>
-                            <td>${date}</td>
-                            <td>
-                                <div style="display: flex; gap: 5px;">
-                                    ${file.type === 'folder' ? 
-                                        `<button class="btn btn-small btn-primary" onclick="loadFiles('${file.path}')">
-                                            <i class="fas fa-folder-open"></i>
-                                        </button>` : 
-                                        `<button class="btn btn-small btn-success" onclick="editFile('${file.path}')">
-                                            <i class="fas fa-edit"></i>
-                                        </button>`
-                                    }
-                                    <button class="btn btn-small btn-danger" onclick="deleteFile('${file.path}')">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                });
-                
-                if (data.files.length === 0) {
-                    html += `
-                        <tr>
-                            <td colspan="5" style="text-align: center; padding: 40px;">
-                                <i class="fas fa-folder-open" style="font-size: 48px; color: #95a5a6; margin-bottom: 15px;"></i>
-                                <p>Folder jest pusty</p>
-                            </td>
-                        </tr>
-                    `;
-                }
-                
-                html += `</tbody></table>`;
-                elements.fileManagerContent.innerHTML = html;
-                
-            } catch (error) {
-                elements.fileManagerContent.innerHTML = `<div class="notification error">Błąd: ${error.message}</div>`;
-            }
-        }
-
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 B';
-            const k = 1024;
-            const sizes = ['B', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        function goUpFolder() {
-            if (currentFilePath) {
-                const parts = currentFilePath.split('/').filter(p => p);
-                parts.pop();
-                const newPath = parts.join('/');
-                loadFiles(newPath);
-            }
-        }
-
-        async function editFile(filePath) {
-            try {
-                const response = await fetch(`${API_URL}/api/files/read?file=${encodeURIComponent(filePath)}`);
-                const data = await response.json();
-                
-                if (data.error) {
-                    showNotification(`Błąd: ${data.error}`, 'error');
-                    return;
-                }
-                
-                const fileName = filePath.split('/').pop();
-                
-                elements.fileManagerContent.innerHTML = `
-                    <div class="file-edit-container">
-                        <div class="file-edit-header">
-                            <h4><i class="fas fa-edit"></i> Edycja: ${fileName}</h4>
-                            <p>Ścieżka: <code>${filePath}</code></p>
-                        </div>
-                        <textarea class="file-edit-textarea" id="fileEditTextarea">${data.content}</textarea>
-                        <div class="file-save-buttons">
-                            <button class="btn btn-primary" onclick="saveFile('${filePath}')">
-                                <i class="fas fa-save"></i> Zapisz
-                            </button>
-                            <button class="btn btn-danger" onclick="loadFiles('${currentFilePath}')">
-                                <i class="fas fa-times"></i> Anuluj
-                            </button>
-                        </div>
-                    </div>
-                `;
-                
-            } catch (error) {
-                showNotification(`Błąd: ${error.message}`, 'error');
-            }
-        }
-
-        async function saveFile(filePath) {
-            const content = document.getElementById('fileEditTextarea').value;
-            
-            try {
-                const response = await fetch(`${API_URL}/api/files/write`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ path: filePath, content: content })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    showNotification('Plik zapisany!', 'success');
-                    loadFiles(currentFilePath);
-                } else {
-                    showNotification(`Błąd: ${data.error}`, 'error');
-                }
-                
-            } catch (error) {
-                showNotification(`Błąd: ${error.message}`, 'error');
-            }
-        }
-
-        async function deleteFile(filePath) {
-            if (!confirm(`Czy na pewno chcesz usunąć ${filePath.split('/').pop()}?`)) {
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${API_URL}/api/files/delete`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ path: filePath })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    showNotification('Usunięto!', 'success');
-                    loadFiles(currentFilePath);
-                } else {
-                    showNotification(`Błąd: ${data.error}`, 'error');
-                }
-                
-            } catch (error) {
-                showNotification(`Błąd: ${error.message}`, 'error');
-            }
-        }
-
-        function createNewFolder() {
-            const folderName = prompt('Podaj nazwę nowego folderu:');
-            if (!folderName) return;
-            
-            const newPath = currentFilePath ? `${currentFilePath}/${folderName}` : folderName;
-            
-            // Stwórz pusty plik .keep w nowym folderze
-            saveFile(newPath + '/.keep');
-        }
-
-        async function performUpload() {
-            const fileInput = elements.fileToUpload;
-            const folderPath = elements.uploadFolderPath.value.trim();
-            
-            if (!fileInput.files.length) {
-                showNotification('Wybierz plik do wgrania', 'error');
-                return;
-            }
-            
-            const file = fileInput.files[0];
-            const formData = new FormData();
-            formData.append('file', file);
-            if (folderPath) {
-                formData.append('folder', folderPath);
-            }
-            
-            elements.uploadProgress.style.display = 'block';
-            elements.uploadStatus.textContent = 'Wgrywanie...';
-            
-            try {
-                const xhr = new XMLHttpRequest();
-                
-                xhr.upload.addEventListener('progress', (e) => {
-                    if (e.lengthComputable) {
-                        const percent = (e.loaded / e.total) * 100;
-                        elements.uploadProgressBar.style.width = percent + '%';
-                        elements.uploadStatus.textContent = `Wgrywanie: ${Math.round(percent)}%`;
-                    }
-                });
-                
-                xhr.addEventListener('load', () => {
-                    if (xhr.status === 200) {
-                        const data = JSON.parse(xhr.responseText);
-                        if (data.success) {
-                            elements.uploadMessage.textContent = '✅ Plik wgrany pomyślnie!';
-                            showNotification('Plik wgrany!', 'success');
-                            hideUploadModal();
-                            loadFiles(currentFilePath);
-                        } else {
-                            elements.uploadMessage.textContent = `❌ ${data.error}`;
-                            showNotification(`Błąd: ${data.error}`, 'error');
-                        }
-                    } else {
-                        elements.uploadMessage.textContent = `❌ Błąd ${xhr.status}`;
-                        showNotification(`Błąd HTTP ${xhr.status}`, 'error');
-                    }
-                });
-                
-                xhr.addEventListener('error', () => {
-                    elements.uploadMessage.textContent = '❌ Błąd połączenia';
-                    showNotification('Błąd połączenia', 'error');
-                });
-                
-                xhr.open('POST', `${API_URL}/api/files/upload`);
-                xhr.send(formData);
-                
-            } catch (error) {
-                elements.uploadMessage.textContent = `❌ ${error.message}`;
-                showNotification(`Błąd: ${error.message}`, 'error');
-            }
-        }
-
-        // Tool Functions
-        async function openServerProperties() {
-            try {
-                const response = await fetch(`${API_URL}/api/files/read?file=server.properties`);
-                const data = await response.json();
-                
-                if (data.error) {
-                    showNotification(`Błąd: ${data.error}`, 'error');
-                    return;
-                }
-                
-                // Otwórz File Manager i edytuj plik
-                openFileManager();
-                setTimeout(() => {
-                    editFile('server.properties');
-                }, 500);
-                
-            } catch (error) {
-                showNotification(`Błąd: ${error.message}`, 'error');
-            }
         }
 
         async function createBackup() {
@@ -1937,20 +1311,6 @@
             } catch (error) {
                 showNotification(`Błąd: ${error.message}`, 'error');
             }
-        }
-
-        function manageWhitelist() {
-            openFileManager();
-            setTimeout(() => {
-                editFile('whitelist.json');
-            }, 500);
-        }
-
-        function manageOps() {
-            openFileManager();
-            setTimeout(() => {
-                editFile('ops.json');
-            }, 500);
         }
     </script>
 </body>
