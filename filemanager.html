@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>☕ Java Manager - Minecraft Server</title>
+    <title>📁 File Manager - Minecraft Server</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -21,7 +21,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background-color: rgba(30, 30, 46, 0.9);
             border-radius: 15px;
@@ -81,67 +81,69 @@
             color: white;
         }
 
-        .java-manager-container {
+        .file-manager-container {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 3fr;
             gap: 30px;
             margin-bottom: 30px;
         }
 
-        @media (max-width: 768px) {
-            .java-manager-container {
+        @media (max-width: 1024px) {
+            .file-manager-container {
                 grid-template-columns: 1fr;
             }
         }
 
-        .java-section {
+        .file-actions-sidebar {
             background-color: rgba(40, 40, 60, 0.8);
             padding: 25px;
             border-radius: 10px;
             border: 1px solid #444;
+            height: fit-content;
         }
 
-        .java-section h2 {
+        .file-actions-sidebar h2 {
             color: #3498db;
             margin-bottom: 20px;
             font-size: 1.5rem;
+        }
+
+        .file-main-content {
+            background-color: rgba(40, 40, 60, 0.8);
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #444;
+            min-height: 600px;
+        }
+
+        .file-path-display {
+            background-color: #2c3e50;
+            padding: 12px 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-family: monospace;
             display: flex;
+            justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
             gap: 10px;
         }
 
-        .java-info-box {
-            background-color: rgba(20, 20, 30, 0.95);
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #444;
-        }
-
-        .java-info-box h3 {
+        .path-text {
             color: #2ecc71;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-        }
-
-        .java-info-item {
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .java-info-item:last-child {
-            border-bottom: none;
-        }
-
-        .java-info-label {
-            color: #95a5a6;
             font-weight: bold;
-            margin-right: 10px;
         }
 
-        .java-info-value {
-            color: #3498db;
+        .path-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .file-actions-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -151,12 +153,11 @@
             font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
-            display: inline-flex;
+            display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
             gap: 8px;
-            text-decoration: none;
         }
 
         .btn:hover {
@@ -200,89 +201,49 @@
             font-size: 0.9rem;
         }
 
-        .java-versions-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .java-version-card {
-            background-color: rgba(20, 20, 30, 0.95);
-            padding: 20px;
+        .file-table-container {
+            overflow-x: auto;
             border-radius: 8px;
+            background-color: rgba(20, 20, 30, 0.95);
             border: 1px solid #444;
-            transition: all 0.3s ease;
         }
 
-        .java-version-card:hover {
-            border-color: #3498db;
-            transform: translateY(-5px);
+        .file-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
         }
 
-        .java-version-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .java-version-name {
-            font-size: 1.3rem;
+        .file-table th {
+            background-color: #2c3e50;
+            padding: 15px;
+            text-align: left;
+            color: #3498db;
             font-weight: bold;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .file-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .file-table tr:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+
+        .file-icon {
+            margin-right: 8px;
             color: #3498db;
         }
 
-        .java-version-status {
-            font-size: 0.8rem;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-weight: bold;
+        .folder-icon {
+            color: #f39c12;
         }
 
-        .status-installed {
-            background-color: rgba(46, 204, 113, 0.2);
-            color: #2ecc71;
-            border: 1px solid #2ecc71;
-        }
-
-        .status-not-installed {
-            background-color: rgba(149, 165, 166, 0.2);
-            color: #95a5a6;
-            border: 1px solid #95a5a6;
-        }
-
-        .status-recommended {
-            background-color: rgba(52, 152, 219, 0.2);
-            color: #3498db;
-            border: 1px solid #3498db;
-        }
-
-        .java-version-details {
-            font-size: 0.9rem;
-            color: #95a5a6;
-            margin-bottom: 15px;
-        }
-
-        .java-version-actions {
+        .file-actions {
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .progress-bar {
-            background: #2c3e50;
-            height: 20px;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 15px 0;
-        }
-
-        .progress-fill {
-            background: #3498db;
-            height: 100%;
-            width: 0%;
-            transition: width 0.3s;
+            gap: 5px;
         }
 
         .loading {
@@ -306,6 +267,122 @@
             to {
                 transform: rotate(360deg);
             }
+        }
+
+        /* Modal styl */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: #1a1a2e;
+            border-radius: 15px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            border: 3px solid #3498db;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-header {
+            background-color: #3498db;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .modal-header h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-body {
+            padding: 25px;
+            overflow-y: auto;
+            max-height: 60vh;
+        }
+
+        .modal-footer {
+            padding: 20px 25px;
+            background-color: rgba(40, 40, 60, 0.8);
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        /* Formularze */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: #2c3e50;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+        }
+
+        textarea.form-control {
+            min-height: 300px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+        }
+
+        /* Upload progress */
+        .upload-progress {
+            margin: 20px 0;
+            display: none;
+        }
+
+        .progress-bar {
+            background: #2c3e50;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            background: #3498db;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
         }
 
         .notification {
@@ -361,398 +438,565 @@
             }
         }
 
-        .minecraft-versions-table {
-            width: 100%;
-            border-collapse: collapse;
+        /* Lista plików w sidebar */
+        .quick-access-list {
+            list-style: none;
             margin-top: 20px;
-            background-color: rgba(20, 20, 30, 0.95);
-            border-radius: 8px;
-            overflow: hidden;
         }
 
-        .minecraft-versions-table th {
-            background-color: #2c3e50;
-            padding: 15px;
-            text-align: left;
-            color: #3498db;
-            font-weight: bold;
+        .quick-access-list li {
+            margin-bottom: 10px;
         }
 
-        .minecraft-versions-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .minecraft-versions-table tr:hover {
+        .quick-access-list a {
+            display: block;
+            padding: 10px 15px;
             background-color: rgba(52, 152, 219, 0.1);
+            border-radius: 6px;
+            color: #3498db;
+            text-decoration: none;
+            transition: all 0.3s ease;
         }
 
-        footer {
-            text-align: center;
-            padding-top: 20px;
-            margin-top: 30px;
-            border-top: 1px solid #444;
-            color: #95a5a6;
-            font-size: 0.9rem;
+        .quick-access-list a:hover {
+            background-color: rgba(52, 152, 219, 0.2);
+            transform: translateX(5px);
+        }
+
+        .quick-access-list a i {
+            margin-right: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><i class="fab fa-java"></i> Java Manager</h1>
-            <p class="subtitle">Zarządzaj wersjami Java dla serwera Minecraft</p>
+            <h1><i class="fas fa-folder-open"></i> File Manager</h1>
+            <p class="subtitle">Zarządzaj plikami serwera Minecraft</p>
         </header>
 
         <div class="nav-tabs">
             <a href="/" class="nav-tab">
                 <i class="fas fa-server"></i> Panel Serwera
             </a>
-            <a href="/filemanager" class="nav-tab">
+            <a href="/filemanager" class="nav-tab active">
                 <i class="fas fa-folder-open"></i> File Manager
             </a>
-            <a href="/javamanager" class="nav-tab active">
+            <a href="/javamanager" class="nav-tab">
                 <i class="fab fa-java"></i> Java Manager
             </a>
         </div>
 
-        <div class="java-manager-container">
-            <div class="java-section">
-                <h2><i class="fas fa-info-circle"></i> Aktualny Status Java</h2>
-                
-                <div class="java-info-box">
-                    <h3><i class="fas fa-server"></i> System Java</h3>
-                    <div class="java-info-item">
-                        <span class="java-info-label">Wersja:</span>
-                        <span class="java-info-value" id="systemJavaVersion">Sprawdzanie...</span>
-                    </div>
-                    <div class="java-info-item">
-                        <span class="java-info-label">Status:</span>
-                        <span class="java-info-value" id="systemJavaStatus">Sprawdzanie...</span>
-                    </div>
-                    <div class="java-info-item">
-                        <span class="java-info-label">Ścieżka:</span>
-                        <span class="java-info-value" id="systemJavaPath">Sprawdzanie...</span>
-                    </div>
+        <div class="file-manager-container">
+            <div class="file-actions-sidebar">
+                <h2><i class="fas fa-tools"></i> Akcje</h2>
+                <div class="file-actions-bar">
+                    <button class="btn btn-primary" id="refreshFilesBtn">
+                        <i class="fas fa-sync-alt"></i> Odśwież
+                    </button>
+                    <button class="btn btn-success" id="uploadFileBtn">
+                        <i class="fas fa-upload"></i> Upload
+                    </button>
+                    <button class="btn btn-primary" id="createFolderBtn">
+                        <i class="fas fa-folder-plus"></i> Nowy Folder
+                    </button>
                 </div>
 
-                <div class="java-info-box">
-                    <h3><i class="fas fa-download"></i> Postęp Pobierania</h3>
-                    <div id="downloadProgressSection" style="display: none;">
-                        <div class="java-info-item">
-                            <span class="java-info-label">Wersja:</span>
-                            <span class="java-info-value" id="downloadingVersion">-</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="downloadProgressBar"></div>
-                        </div>
-                        <div class="java-info-item">
-                            <span class="java-info-label">Status:</span>
-                            <span class="java-info-value" id="downloadStatus">-</span>
-                        </div>
-                    </div>
-                    <div id="noDownloadSection">
-                        <p style="color: #95a5a6; text-align: center;">Brak aktywnych pobrań</p>
-                    </div>
-                </div>
+                <h2 style="margin-top: 30px;"><i class="fas fa-bolt"></i> Szybki Dostęp</h2>
+                <ul class="quick-access-list">
+                    <li><a href="#" onclick="loadSpecificFile('server.properties')"><i class="fas fa-cog"></i> server.properties</a></li>
+                    <li><a href="#" onclick="loadSpecificFile('eula.txt')"><i class="fas fa-file-contract"></i> eula.txt</a></li>
+                    <li><a href="#" onclick="loadSpecificFile('ops.json')"><i class="fas fa-user-shield"></i> ops.json</a></li>
+                    <li><a href="#" onclick="loadSpecificFile('whitelist.json')"><i class="fas fa-user-check"></i> whitelist.json</a></li>
+                    <li><a href="#" onclick="loadSpecificFile('bukkit.yml')"><i class="fas fa-file-code"></i> bukkit.yml</a></li>
+                    <li><a href="#" onclick="loadSpecificFile('spigot.yml')"><i class="fas fa-file-code"></i> spigot.yml</a></li>
+                </ul>
             </div>
 
-            <div class="java-section">
-                <h2><i class="fas fa-download"></i> Pobierz Nową Wersję</h2>
-                <p style="color: #95a5a6; margin-bottom: 20px;">Wybierz wersję Java do pobrania i instalacji:</p>
-                
-                <div class="java-versions-grid" id="javaVersionsGrid">
+            <div class="file-main-content">
+                <div class="file-path-display">
+                    <div>
+                        <span class="path-text" id="currentPathDisplay">/</span>
+                    </div>
+                    <div class="path-controls">
+                        <button class="btn btn-small btn-primary" id="goHomeBtn">
+                            <i class="fas fa-home"></i> Home
+                        </button>
+                        <button class="btn btn-small btn-primary" id="goUpBtn" style="display: none;">
+                            <i class="fas fa-level-up-alt"></i> Up
+                        </button>
+                    </div>
+                </div>
+
+                <div id="fileManagerContent">
                     <div class="loading">
                         <div class="spinner"></div>
-                        <p>Ładowanie wersji Java...</p>
+                        <p>Ładowanie plików...</p>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="java-section">
-            <h2><i class="fas fa-check-circle"></i> Zainstalowane Wersje</h2>
-            <div id="installedJavaVersions">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>Ładowanie zainstalowanych wersji...</p>
+    <!-- Modal Upload -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-upload"></i> Upload Pliku</h2>
+                <button class="btn btn-small btn-danger" onclick="hideModal('uploadModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="uploadFolderPath">Folder docelowy:</label>
+                    <input type="text" id="uploadFolderPath" class="form-control" placeholder="(pozostaw puste dla głównego folderu)" value="">
+                </div>
+                <div class="form-group">
+                    <label for="fileToUpload">Wybierz plik:</label>
+                    <input type="file" id="fileToUpload" class="form-control">
+                </div>
+                <div class="upload-progress" id="uploadProgress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="uploadProgressBar"></div>
+                    </div>
+                    <p id="uploadStatus">Przygotowywanie...</p>
                 </div>
             </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="performUpload()">
+                    <i class="fas fa-upload"></i> Upload
+                </button>
+                <button class="btn btn-danger" onclick="hideModal('uploadModal')">
+                    <i class="fas fa-times"></i> Anuluj
+                </button>
+            </div>
         </div>
+    </div>
 
-        <div class="java-section">
-            <h2><i class="fas fa-table"></i> Kompatybilność z Minecraft</h2>
-            <p style="color: #95a5a6; margin-bottom: 20px;">Mapowanie wersji Minecraft na wymagane wersje Java:</p>
-            
-            <table class="minecraft-versions-table">
-                <thead>
-                    <tr>
-                        <th>Wersja Minecraft</th>
-                        <th>Wymagana Java</th>
-                        <th>Rekomendowana</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="minecraftCompatibilityTable">
-                    <tr>
-                        <td>1.21.x</td>
-                        <td>Java 21</td>
-                        <td><i class="fas fa-star" style="color: #f39c12;"></i> Tak</td>
-                        <td><span class="status-recommended">Rekomendowana</span></td>
-                    </tr>
-                    <tr>
-                        <td>1.20.x</td>
-                        <td>Java 17</td>
-                        <td><i class="fas fa-star" style="color: #f39c12;"></i> Tak</td>
-                        <td><span class="status-recommended">Rekomendowana</span></td>
-                    </tr>
-                    <tr>
-                        <td>1.19.x</td>
-                        <td>Java 17</td>
-                        <td><i class="fas fa-check" style="color: #2ecc71;"></i> Tak</td>
-                        <td><span class="status-installed">Wspierana</span></td>
-                    </tr>
-                    <tr>
-                        <td>1.18.x</td>
-                        <td>Java 17</td>
-                        <td><i class="fas fa-check" style="color: #2ecc71;"></i> Tak</td>
-                        <td><span class="status-installed">Wspierana</span></td>
-                    </tr>
-                    <tr>
-                        <td>1.17.x</td>
-                        <td>Java 16</td>
-                        <td><i class="fas fa-check" style="color: #2ecc71;"></i> Tak</td>
-                        <td><span class="status-installed">Wspierana</span></td>
-                    </tr>
-                    <tr>
-                        <td>1.16.x</td>
-                        <td>Java 8</td>
-                        <td><i class="fas fa-check" style="color: #2ecc71;"></i> Tak</td>
-                        <td><span class="status-installed">Wspierana</span></td>
-                    </tr>
-                    <tr>
-                        <td>1.12.x</td>
-                        <td>Java 8</td>
-                        <td><i class="fas fa-check" style="color: #2ecc71;"></i> Tak</td>
-                        <td><span class="status-installed">Wspierana</span></td>
-                    </tr>
-                </tbody>
-            </table>
+    <!-- Modal Nowy Folder -->
+    <div class="modal" id="newFolderModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-folder-plus"></i> Nowy Folder</h2>
+                <button class="btn btn-small btn-danger" onclick="hideModal('newFolderModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="newFolderName">Nazwa folderu:</label>
+                    <input type="text" id="newFolderName" class="form-control" placeholder="np. config, plugins...">
+                </div>
+                <div class="form-group">
+                    <label for="newFolderPath">Ścieżka (opcjonalnie):</label>
+                    <input type="text" id="newFolderPath" class="form-control" placeholder="(pozostaw puste dla bieżącego folderu)">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="createFolder()">
+                    <i class="fas fa-folder-plus"></i> Utwórz
+                </button>
+                <button class="btn btn-danger" onclick="hideModal('newFolderModal')">
+                    <i class="fas fa-times"></i> Anuluj
+                </button>
+            </div>
         </div>
+    </div>
 
-        <footer>
-            <p>Java Manager v1.0 | Wersje Java są pobierane z oficjalnych źródeł Oracle</p>
-            <p>Uwaga: Pobieranie większych wersji Java może zająć kilka minut</p>
-        </footer>
+    <!-- Modal Edycji Pliku -->
+    <div class="modal" id="editFileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-edit"></i> Edycja Pliku</h2>
+                <button class="btn btn-small btn-danger" onclick="hideModal('editFileModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="fileEditContent">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Ładowanie pliku...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" onclick="saveEditedFile()">
+                    <i class="fas fa-save"></i> Zapisz
+                </button>
+                <button class="btn btn-danger" onclick="hideModal('editFileModal')">
+                    <i class="fas fa-times"></i> Anuluj
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Zmiany Nazwy -->
+    <div class="modal" id="renameModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-i-cursor"></i> Zmień Nazwę</h2>
+                <button class="btn btn-small btn-danger" onclick="hideModal('renameModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="renameOldName">Obecna nazwa:</label>
+                    <input type="text" id="renameOldName" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="renameNewName">Nowa nazwa:</label>
+                    <input type="text" id="renameNewName" class="form-control" placeholder="Wpisz nową nazwę...">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="performRename()">
+                    <i class="fas fa-check"></i> Zmień
+                </button>
+                <button class="btn btn-danger" onclick="hideModal('renameModal')">
+                    <i class="fas fa-times"></i> Anuluj
+                </button>
+            </div>
+        </div>
     </div>
 
     <script>
         const API_URL = window.location.origin;
-        let downloadCheckInterval = null;
+        let currentFilePath = '';
+        let currentEditingFile = '';
 
         // Inicjalizacja
         document.addEventListener('DOMContentLoaded', function() {
-            loadJavaInfo();
-            loadAvailableJavaVersions();
-            loadInstalledJavaVersions();
+            setupEventListeners();
             
-            // Sprawdzaj postęp pobierania co 2 sekundy
-            downloadCheckInterval = setInterval(checkDownloadProgress, 2000);
-        });
-
-        // Cleanup przy zamknięciu strony
-        window.addEventListener('beforeunload', function() {
-            if (downloadCheckInterval) {
-                clearInterval(downloadCheckInterval);
+            // Sprawdź czy mamy plik do załadowania z URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const fileParam = urlParams.get('file');
+            if (fileParam) {
+                setTimeout(() => {
+                    loadSpecificFile(fileParam);
+                }, 500);
+            } else {
+                loadFiles('');
             }
         });
 
-        async function loadJavaInfo() {
-            try {
-                const response = await fetch(`${API_URL}/api/java/versions`);
-                const data = await response.json();
+        function setupEventListeners() {
+            document.getElementById('refreshFilesBtn').addEventListener('click', () => loadFiles(currentFilePath));
+            document.getElementById('uploadFileBtn').addEventListener('click', () => showModal('uploadModal'));
+            document.getElementById('createFolderBtn').addEventListener('click', () => showModal('newFolderModal'));
+            document.getElementById('goHomeBtn').addEventListener('click', () => loadFiles(''));
+            document.getElementById('goUpBtn').addEventListener('click', goUpFolder);
+        }
+
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
                 
-                // Aktualizuj informacje o systemowej Javie
-                const systemInfo = data.system_java;
-                document.getElementById('systemJavaVersion').textContent = systemInfo.version || 'Nie wykryto';
-                document.getElementById('systemJavaStatus').textContent = systemInfo.installed ? '✅ Zainstalowana' : '❌ Nie zainstalowana';
-                document.getElementById('systemJavaPath').textContent = systemInfo.installed ? 'System PATH' : 'Brak';
-                
-                if (!systemInfo.installed) {
-                    document.getElementById('systemJavaVersion').style.color = '#e74c3c';
-                    document.getElementById('systemJavaStatus').style.color = '#e74c3c';
-                } else {
-                    document.getElementById('systemJavaVersion').style.color = '#2ecc71';
-                    document.getElementById('systemJavaStatus').style.color = '#2ecc71';
+                if (modalId === 'uploadModal') {
+                    document.getElementById('uploadFolderPath').value = currentFilePath;
+                    document.getElementById('uploadProgress').style.display = 'none';
+                    document.getElementById('uploadProgressBar').style.width = '0%';
+                } else if (modalId === 'newFolderModal') {
+                    document.getElementById('newFolderName').value = '';
+                    document.getElementById('newFolderPath').value = currentFilePath;
                 }
-                
-            } catch (error) {
-                console.error('Błąd ładowania informacji Java:', error);
-                document.getElementById('systemJavaVersion').textContent = 'Błąd';
-                document.getElementById('systemJavaStatus').textContent = '❌ Błąd połączenia';
-                document.getElementById('systemJavaPath').textContent = 'Brak';
             }
         }
 
-        async function loadAvailableJavaVersions() {
+        function hideModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        async function loadFiles(path) {
+            currentFilePath = path || '';
+            
             try {
-                const response = await fetch(`${API_URL}/api/java/versions`);
+                const response = await fetch(`${API_URL}/api/files/list?path=${encodeURIComponent(path)}`);
                 const data = await response.json();
                 
-                const versionsGrid = document.getElementById('javaVersionsGrid');
-                versionsGrid.innerHTML = '';
+                if (data.error) {
+                    showNotification(`Błąd: ${data.error}`, 'error');
+                    return;
+                }
                 
-                // Pobierz zainstalowane wersje dla porównania
-                const installedVersions = data.installed || [];
-                const installedVersionNumbers = installedVersions.map(v => v.version.split('.')[0]);
-                
-                data.available.forEach(version => {
-                    const isInstalled = installedVersionNumbers.includes(version);
-                    const isRecommended = ['21', '17'].includes(version);
-                    
-                    const versionCard = document.createElement('div');
-                    versionCard.className = 'java-version-card';
-                    
-                    versionCard.innerHTML = `
-                        <div class="java-version-header">
-                            <div class="java-version-name">Java ${version}</div>
-                            <span class="java-version-status ${isInstalled ? 'status-installed' : 'status-not-installed'}">
-                                ${isInstalled ? 'ZAINSTALOWANA' : 'DO POBRANIA'}
-                            </span>
-                        </div>
-                        <div class="java-version-details">
-                            <p>${getJavaVersionDescription(version)}</p>
-                            <p><strong>Kompatybilność:</strong> ${getMinecraftCompatibility(version)}</p>
-                        </div>
-                        <div class="java-version-actions">
-                            ${isInstalled ? 
-                                `<button class="btn btn-success btn-small" onclick="setJavaVersion('${version}')">
-                                    <i class="fas fa-check"></i> Użyj
-                                </button>` :
-                                `<button class="btn btn-primary btn-small" onclick="downloadJavaVersion('${version}')">
-                                    <i class="fas fa-download"></i> Pobierz
-                                </button>`
-                            }
-                            ${isRecommended ? 
-                                `<span style="color: #f39c12; font-size: 0.8rem;">
-                                    <i class="fas fa-star"></i> Rekomendowana
-                                </span>` : ''
-                            }
-                        </div>
-                    `;
-                    
-                    versionsGrid.appendChild(versionCard);
-                });
+                updateFileDisplay(data);
                 
             } catch (error) {
-                console.error('Błąd ładowania dostępnych wersji Java:', error);
-                document.getElementById('javaVersionsGrid').innerHTML = `
-                    <div style="color: #e74c3c; text-align: center; padding: 40px;">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 15px;"></i>
-                        <p>Błąd ładowania wersji Java</p>
-                        <p style="font-size: 0.9rem;">${error.message}</p>
-                    </div>
+                showNotification(`Błąd: ${error.message}`, 'error');
+            }
+        }
+
+        function updateFileDisplay(data) {
+            // Aktualizuj ścieżkę
+            document.getElementById('currentPathDisplay').textContent = data.path ? `/${data.path}` : '/';
+            
+            // Pokaż/ukryj przycisk Up
+            document.getElementById('goUpBtn').style.display = data.path ? 'block' : 'none';
+            
+            // Generuj tabelę
+            let html = `
+                <div class="file-table-container">
+                    <table class="file-table">
+                        <thead>
+                            <tr>
+                                <th>Nazwa</th>
+                                <th>Typ</th>
+                                <th>Rozmiar</th>
+                                <th>Zmodyfikowano</th>
+                                <th>Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            // Dodaj ".." dla powrotu
+            if (data.path && data.path !== '') {
+                const parentPath = data.path.split('/').slice(0, -1).join('/');
+                html += `
+                    <tr>
+                        <td colspan="5">
+                            <button class="btn btn-small btn-primary" onclick="loadFiles('${parentPath}')">
+                                <i class="fas fa-level-up-alt"></i> .. (powrót)
+                            </button>
+                        </td>
+                    </tr>
                 `;
             }
+            
+            // Pliki i foldery
+            data.files.forEach(file => {
+                const size = file.type === 'folder' ? '-' : formatFileSize(file.size);
+                const date = new Date(file.modified * 1000).toLocaleString('pl-PL');
+                const icon = file.type === 'folder' ? 'fa-folder folder-icon' : 'fa-file file-icon';
+                const typeText = file.type === 'folder' ? 'Folder' : getFileType(file.name);
+                
+                html += `
+                    <tr>
+                        <td>
+                            <i class="fas ${icon}"></i>
+                            ${file.name}
+                        </td>
+                        <td>${typeText}</td>
+                        <td>${size}</td>
+                        <td>${date}</td>
+                        <td>
+                            <div class="file-actions">
+                                ${file.type === 'folder' ? 
+                                    `<button class="btn btn-small btn-primary" onclick="loadFiles('${file.path}')">
+                                        <i class="fas fa-folder-open"></i>
+                                    </button>` : 
+                                    `<button class="btn btn-small btn-success" onclick="editFile('${file.path}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>`
+                                }
+                                <button class="btn btn-small btn-warning" onclick="renameFile('${file.path}', '${file.name}')">
+                                    <i class="fas fa-i-cursor"></i>
+                                </button>
+                                <button class="btn btn-small btn-danger" onclick="deleteFile('${file.path}', '${file.name}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            if (data.files.length === 0) {
+                html += `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 40px;">
+                            <i class="fas fa-folder-open" style="font-size: 48px; color: #95a5a6; margin-bottom: 15px;"></i>
+                            <p>Folder jest pusty</p>
+                        </td>
+                    </tr>
+                `;
+            }
+            
+            html += `</tbody></table></div>`;
+            document.getElementById('fileManagerContent').innerHTML = html;
         }
 
-        async function loadInstalledJavaVersions() {
-            try {
-                const response = await fetch(`${API_URL}/api/java/versions`);
-                const data = await response.json();
-                
-                const installedDiv = document.getElementById('installedJavaVersions');
-                
-                if (data.installed && data.installed.length > 0) {
-                    let html = '<div class="java-versions-grid">';
-                    
-                    data.installed.forEach(java => {
-                        const isSystem = java.name === 'System Java';
-                        
-                        html += `
-                            <div class="java-version-card">
-                                <div class="java-version-header">
-                                    <div class="java-version-name">${java.name}</div>
-                                    <span class="java-version-status ${isSystem ? 'status-recommended' : 'status-installed'}">
-                                        ${isSystem ? 'SYSTEM' : 'ZAINSTALOWANA'}
-                                    </span>
-                                </div>
-                                <div class="java-version-details">
-                                    <p><strong>Wersja:</strong> ${java.version}</p>
-                                    <p><strong>Ścieżka:</strong> ${java.path}</p>
-                                </div>
-                                ${!isSystem ? `
-                                    <div class="java-version-actions">
-                                        <button class="btn btn-success btn-small" onclick="setJavaVersion('${java.version.split('.')[0]}')">
-                                            <i class="fas fa-check"></i> Użyj
-                                        </button>
-                                    </div>
-                                ` : ''}
-                            </div>
-                        `;
-                    });
-                    
-                    html += '</div>';
-                    installedDiv.innerHTML = html;
-                } else {
-                    installedDiv.innerHTML = `
-                        <div style="color: #95a5a6; text-align: center; padding: 40px;">
-                            <i class="fas fa-download" style="font-size: 48px; margin-bottom: 15px;"></i>
-                            <p>Brak zainstalowanych wersji Java</p>
-                            <p style="font-size: 0.9rem;">Użyj sekcji "Pobierz Nową Wersję" aby zainstalować Java</p>
-                        </div>
-                    `;
-                }
-                
-            } catch (error) {
-                console.error('Błąd ładowania zainstalowanych wersji:', error);
+        function getFileType(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const types = {
+                'txt': 'Text',
+                'json': 'JSON',
+                'yml': 'YAML',
+                'yaml': 'YAML',
+                'properties': 'Properties',
+                'jar': 'Java Archive',
+                'zip': 'ZIP Archive',
+                'tar': 'TAR Archive',
+                'gz': 'GZIP Archive',
+                'log': 'Log File',
+                'dat': 'Data File',
+                'png': 'Image',
+                'jpg': 'Image',
+                'jpeg': 'Image',
+                'gif': 'Image',
+                'md': 'Markdown'
+            };
+            return types[ext] || 'File';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function goUpFolder() {
+            if (currentFilePath) {
+                const parts = currentFilePath.split('/').filter(p => p);
+                parts.pop();
+                const newPath = parts.join('/');
+                loadFiles(newPath);
             }
         }
 
-        function getJavaVersionDescription(version) {
-            const descriptions = {
-                '21': 'Najnowsza LTS, najlepsza dla Minecraft 1.21+',
-                '17': 'LTS, optymalna dla Minecraft 1.18-1.20',
-                '8': 'Legacy, wymagana dla starszych wersji'
-            };
-            return descriptions[version] || 'Stabilna wersja Java';
+        async function editFile(filePath) {
+            currentEditingFile = filePath;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/files/read?file=${encodeURIComponent(filePath)}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    showNotification(`Błąd: ${data.error}`, 'error');
+                    return;
+                }
+                
+                const fileName = filePath.split('/').pop();
+                
+                document.getElementById('fileEditContent').innerHTML = `
+                    <div class="form-group">
+                        <label>Edytujesz: <strong>${fileName}</strong></label>
+                        <label>Ścieżka: <code>${filePath}</code></label>
+                        <textarea id="fileEditTextarea" class="form-control">${data.content}</textarea>
+                    </div>
+                `;
+                
+                showModal('editFileModal');
+                
+            } catch (error) {
+                showNotification(`Błąd: ${error.message}`, 'error');
+            }
         }
 
-        function getMinecraftCompatibility(javaVersion) {
-            const compatibility = {
-                '21': 'Minecraft 1.21.x',
-                '17': 'Minecraft 1.18-1.20.x',
-                '16': 'Minecraft 1.17.x',
-                '8': 'Minecraft 1.16.x i starsze'
-            };
-            return compatibility[javaVersion] || 'Starsze wersje';
+        async function saveEditedFile() {
+            const content = document.getElementById('fileEditTextarea').value;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/files/write`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: currentEditingFile, content: content })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Plik zapisany!', 'success');
+                    hideModal('editFileModal');
+                    loadFiles(currentFilePath);
+                } else {
+                    showNotification(`Błąd: ${data.error}`, 'error');
+                }
+                
+            } catch (error) {
+                showNotification(`Błąd: ${error.message}`, 'error');
+            }
         }
 
-        async function downloadJavaVersion(version) {
-            if (!confirm(`Czy na pewno chcesz pobrać Java ${version}?\n\nPobieranie może zająć kilka minut.`)) {
+        function renameFile(filePath, oldName) {
+            document.getElementById('renameOldName').value = oldName;
+            document.getElementById('renameNewName').value = '';
+            currentEditingFile = filePath;
+            showModal('renameModal');
+        }
+
+        async function performRename() {
+            const newName = document.getElementById('renameNewName').value.trim();
+            if (!newName) {
+                showNotification('Podaj nową nazwę', 'error');
+                return;
+            }
+            
+            // Pobierz zawartość starego pliku
+            try {
+                const response = await fetch(`${API_URL}/api/files/read?file=${encodeURIComponent(currentEditingFile)}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    showNotification(`Błąd: ${data.error}`, 'error');
+                    return;
+                }
+                
+                // Oblicz nową ścieżkę
+                const pathParts = currentEditingFile.split('/');
+                pathParts.pop(); // Usuń starą nazwę
+                pathParts.push(newName); // Dodaj nową nazwę
+                const newPath = pathParts.join('/');
+                
+                // Zapisz pod nową nazwą
+                const writeResponse = await fetch(`${API_URL}/api/files/write`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: newPath, content: data.content })
+                });
+                
+                const writeData = await writeResponse.json();
+                
+                if (writeData.success) {
+                    // Usuń stary plik
+                    await fetch(`${API_URL}/api/files/delete`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ path: currentEditingFile })
+                    });
+                    
+                    showNotification('Nazwa zmieniona!', 'success');
+                    hideModal('renameModal');
+                    loadFiles(currentFilePath);
+                } else {
+                    showNotification(`Błąd: ${writeData.error}`, 'error');
+                }
+                
+            } catch (error) {
+                showNotification(`Błąd: ${error.message}`, 'error');
+            }
+        }
+
+        async function deleteFile(filePath, fileName) {
+            if (!confirm(`Czy na pewno chcesz usunąć "${fileName}"?`)) {
                 return;
             }
             
             try {
-                const response = await fetch(`${API_URL}/api/java/download`, {
+                const response = await fetch(`${API_URL}/api/files/delete`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ version: version })
+                    body: JSON.stringify({ path: filePath })
                 });
                 
                 const data = await response.json();
                 
                 if (data.success) {
-                    showNotification(`Rozpoczęto pobieranie Java ${version}`, 'info');
-                    
-                    // Pokaż sekcję pobierania
-                    document.getElementById('downloadProgressSection').style.display = 'block';
-                    document.getElementById('noDownloadSection').style.display = 'none';
-                    document.getElementById('downloadingVersion').textContent = `Java ${version}`;
-                    document.getElementById('downloadStatus').textContent = 'Rozpoczynanie...';
-                    
+                    showNotification('Usunięto!', 'success');
+                    loadFiles(currentFilePath);
                 } else {
-                    showNotification(`Błąd: ${data.message}`, 'error');
+                    showNotification(`Błąd: ${data.error}`, 'error');
                 }
                 
             } catch (error) {
@@ -760,66 +1004,101 @@
             }
         }
 
-        async function checkDownloadProgress() {
+        function createFolder() {
+            const folderName = document.getElementById('newFolderName').value.trim();
+            const folderPath = document.getElementById('newFolderPath').value.trim();
+            
+            if (!folderName) {
+                showNotification('Podaj nazwę folderu', 'error');
+                return;
+            }
+            
+            const fullPath = folderPath ? `${folderPath}/${folderName}` : folderName;
+            
+            // Stwórz pusty plik .keep w nowym folderze
+            fetch(`${API_URL}/api/files/write`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path: `${fullPath}/.keep`, content: '# Created by File Manager' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Folder utworzony!', 'success');
+                    hideModal('newFolderModal');
+                    loadFiles(currentFilePath);
+                } else {
+                    showNotification(`Błąd: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                showNotification(`Błąd: ${error.message}`, 'error');
+            });
+        }
+
+        async function performUpload() {
+            const fileInput = document.getElementById('fileToUpload');
+            const folderPath = document.getElementById('uploadFolderPath').value.trim();
+            
+            if (!fileInput.files.length) {
+                showNotification('Wybierz plik do wgrania', 'error');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            if (folderPath) {
+                formData.append('folder', folderPath);
+            }
+            
+            const uploadProgress = document.getElementById('uploadProgress');
+            const progressBar = document.getElementById('uploadProgressBar');
+            const uploadStatus = document.getElementById('uploadStatus');
+            
+            uploadProgress.style.display = 'block';
+            uploadStatus.textContent = 'Wgrywanie...';
+            
             try {
-                const response = await fetch(`${API_URL}/api/java/progress`);
-                const data = await response.json();
+                const xhr = new XMLHttpRequest();
                 
-                if (data.progress !== undefined) {
-                    const progress = data.progress;
-                    const progressBar = document.getElementById('downloadProgressBar');
-                    const downloadStatus = document.getElementById('downloadStatus');
-                    
-                    progressBar.style.width = progress + '%';
-                    
-                    if (progress === 0) {
-                        downloadStatus.textContent = 'Przygotowywanie...';
-                    } else if (progress < 100) {
-                        downloadStatus.textContent = `Pobieranie: ${Math.round(progress)}%`;
-                    } else if (progress === 100) {
-                        downloadStatus.textContent = 'Instalowanie...';
-                        
-                        // Po chwili odśwież listy
-                        setTimeout(() => {
-                            loadJavaInfo();
-                            loadAvailableJavaVersions();
-                            loadInstalledJavaVersions();
-                            
-                            // Ukryj sekcję pobierania
-                            setTimeout(() => {
-                                document.getElementById('downloadProgressSection').style.display = 'none';
-                                document.getElementById('noDownloadSection').style.display = 'block';
-                                showNotification('Java zainstalowana pomyślnie!', 'success');
-                            }, 3000);
-                        }, 2000);
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const percent = (e.loaded / e.total) * 100;
+                        progressBar.style.width = percent + '%';
+                        uploadStatus.textContent = `Wgrywanie: ${Math.round(percent)}%`;
                     }
-                }
-                
-            } catch (error) {
-                console.error('Błąd sprawdzania postępu:', error);
-            }
-        }
-
-        async function setJavaVersion(version) {
-            try {
-                const response = await fetch(`${API_URL}/api/java/set`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ version: version })
                 });
                 
-                const data = await response.json();
+                xhr.addEventListener('load', () => {
+                    if (xhr.status === 200) {
+                        const data = JSON.parse(xhr.responseText);
+                        if (data.success) {
+                            showNotification('Plik wgrany!', 'success');
+                            hideModal('uploadModal');
+                            loadFiles(currentFilePath);
+                        } else {
+                            showNotification(`Błąd: ${data.error}`, 'error');
+                        }
+                    } else {
+                        showNotification(`Błąd HTTP ${xhr.status}`, 'error');
+                    }
+                });
                 
-                if (data.success) {
-                    showNotification(`Ustawiono Java ${version} jako domyślną`, 'success');
-                    loadJavaInfo();
-                } else {
-                    showNotification(`Błąd: ${data.message}`, 'error');
-                }
+                xhr.addEventListener('error', () => {
+                    showNotification('Błąd połączenia', 'error');
+                });
+                
+                xhr.open('POST', `${API_URL}/api/files/upload`);
+                xhr.send(formData);
                 
             } catch (error) {
                 showNotification(`Błąd: ${error.message}`, 'error');
             }
+        }
+
+        function loadSpecificFile(filePath) {
+            editFile(filePath);
         }
 
         function showNotification(message, type = 'info') {
